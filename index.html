@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>The Grey Corridor - NEXUS PLAY</title>
+    <title>Soviet Nightmare - Charlie's Axe | NEXUS PLAY</title>
     <style>
         * {
             margin: 0;
@@ -13,7 +13,7 @@
         }
 
         body {
-            background: #0a0c0e;
+            background: #0a0a0a;
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -22,7 +22,6 @@
             overflow: hidden;
         }
 
-        /* Game container */
         .game-container {
             position: relative;
             width: 100vw;
@@ -41,121 +40,152 @@
             cursor: crosshair;
         }
 
-        /* UI overlays */
+        /* UI Overlays */
         .ui-panel {
             position: absolute;
             z-index: 20;
-            pointer-events: none;
             font-family: 'Courier New', monospace;
+            pointer-events: none;
+            background: rgba(0,0,0,0.6);
+            padding: 8px 16px;
+            border-left: 3px solid #8b0000;
         }
 
-        #healthBarContainer {
+        #healthBar {
             bottom: 30px;
             left: 20px;
-            width: 220px;
-            background: #1a1f22;
-            border: 1px solid #4a3a2a;
-            border-radius: 4px;
-            padding: 2px;
+            width: 250px;
         }
 
         #healthFill {
             height: 12px;
-            background: #6a2a2a;
+            background: #c0392b;
             width: 100%;
             transition: width 0.2s;
-            box-shadow: 0 0 4px #c44;
         }
 
         #stats {
             top: 20px;
             right: 20px;
             text-align: right;
-            background: rgba(0,0,0,0.65);
-            padding: 8px 14px;
-            border-left: 3px solid #5a4a3a;
-            font-size: 14px;
-            letter-spacing: 1px;
-            backdrop-filter: blur(4px);
         }
 
-        #stats span {
-            color: #bc9a6c;
-            font-weight: bold;
-        }
-
-        #levelText {
+        #inventory {
             bottom: 30px;
             right: 20px;
-            background: rgba(0,0,0,0.5);
-            padding: 4px 12px;
-            font-size: 12px;
-            color: #9a8a7a;
+            text-align: center;
+            min-width: 120px;
         }
 
         .interact-message {
             position: absolute;
-            bottom: 35%;
+            bottom: 40%;
             left: 50%;
             transform: translateX(-50%);
-            background: #000000aa;
-            color: #ddccaa;
-            padding: 8px 18px;
-            font-size: 14px;
-            border-radius: 20px;
+            background: #000000cc;
+            color: #ffcc88;
+            padding: 10px 24px;
+            font-size: 16px;
+            border-radius: 30px;
             font-weight: bold;
             backdrop-filter: blur(8px);
             white-space: nowrap;
             pointer-events: none;
             z-index: 25;
-            font-family: monospace;
-            border: 1px solid #aa8a60;
+            border: 1px solid #aa6a3a;
         }
 
-        /* Splash screen style */
+        /* Story Modal */
+        .story-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 200;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Courier New', monospace;
+            backdrop-filter: blur(5px);
+        }
+
+        .story-box {
+            background: #1a1410;
+            border: 2px solid #6a2a1a;
+            padding: 40px 50px;
+            max-width: 600px;
+            text-align: center;
+            color: #d4c4aa;
+            box-shadow: 0 0 40px rgba(0,0,0,0.8);
+        }
+
+        .story-box h1 {
+            color: #aa4a2a;
+            margin-bottom: 25px;
+            letter-spacing: 3px;
+        }
+
+        .story-box p {
+            font-size: 18px;
+            line-height: 1.6;
+            margin: 20px 0;
+        }
+
+        .story-box button {
+            margin-top: 25px;
+            padding: 10px 30px;
+            background: #3a2a1a;
+            border: 1px solid #8a5a3a;
+            color: #eeddbb;
+            font-family: monospace;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .story-box button:hover {
+            background: #5a3a2a;
+            border-color: #cc8844;
+        }
+
+        .hidden {
+            display: none;
+        }
+
         .splash {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: #1a1e1f;
-            z-index: 200;
+            background: #121614;
+            z-index: 300;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             font-family: 'Courier New', monospace;
             transition: opacity 1s ease;
-            color: #c4bcac;
+            color: #bfb89a;
         }
 
         .splash-content {
             text-align: center;
-            transform: translateY(-5%);
         }
 
         .made-with {
-            font-size: 1.2rem;
-            letter-spacing: 6px;
-            font-weight: 300;
-            color: #8faa8a;
-            margin-bottom: 20px;
-        }
-
-        .heart-icon {
-            font-size: 3rem;
-            color: #6a8e6a;
-            margin: 15px 0;
+            font-size: 1.1rem;
+            letter-spacing: 5px;
+            color: #7a9a6a;
         }
 
         .studio-name {
-            font-size: 2.1rem;
+            font-size: 2rem;
             font-weight: 800;
             letter-spacing: 4px;
-            color: #ddd2bf;
             margin-top: 20px;
-            text-shadow: 0 0 6px #2a3a2a;
         }
 
         .version-tag {
@@ -163,610 +193,537 @@
             bottom: 18px;
             right: 22px;
             font-size: 0.65rem;
-            color: #6a6e64;
-            letter-spacing: 1px;
+            color: #5a5e54;
         }
 
         .fade-out {
             opacity: 0;
             pointer-events: none;
         }
-
-        button {
-            pointer-events: auto;
-            cursor: pointer;
-        }
-
-        .hidden {
-            display: none;
-        }
     </style>
 </head>
 <body>
-<div class="game-container" id="gameContainer">
+<div class="game-container">
     <canvas id="gameCanvas"></canvas>
-    <div class="ui-panel" id="healthBarContainer">
-        <div id="healthFill"></div>
+    <div class="ui-panel" id="healthBar">
+        ❤️ HEALTH <div id="healthFill"></div>
     </div>
     <div class="ui-panel" id="stats">
-        🔦 <span id="batteryVal">100</span>% &nbsp;| 📜 <span id="diaryCount">0</span>/5 &nbsp;| 🧠 <span id="sanity">100</span>%
+        🪓 <span id="axeStatus">NO AXE</span><br>
+        🧠 <span id="sanityVal">100</span>%
     </div>
-    <div class="ui-panel" id="levelText">
-        LEVEL <span id="currentLevel">1</span> / 5
+    <div class="ui-panel" id="inventory">
+        🎒 INVENTORY<br>
+        <span id="invItem">---</span>
     </div>
     <div id="interactMsg" class="interact-message hidden"></div>
 </div>
 
 <script>
-    (function(){
-        // ----------------------------- SPLASH SCREEN ---------------------------------
+    (function() {
+        // ------------------------- SPLASH SCREEN ---------------------------------
         const splashDiv = document.createElement('div');
         splashDiv.className = 'splash';
         splashDiv.innerHTML = `
             <div class="splash-content">
-                <div class="made-with">MADE WITH</div>
-                <div class="heart-icon">◉ CODE ◉</div>
+                <div class="made-with">MADE WITH CODE</div>
                 <div class="studio-name">NEXUS PLAY</div>
-                <div style="margin-top: 35px; font-size:0.9rem; letter-spacing:2px;">THE GREY CORRIDOR</div>
+                <div style="margin-top: 25px; font-size:0.9rem;">SOVIET NIGHTMARE</div>
             </div>
-            <div class="version-tag">version 1.0 (build 0422)</div>
+            <div class="version-tag">version 1.0 (build 0423)</div>
         `;
         document.body.appendChild(splashDiv);
         
         setTimeout(() => {
             splashDiv.classList.add('fade-out');
-            setTimeout(() => {
-                splashDiv.remove();
-                initGame();  // start game after splash
-            }, 1000);
-        }, 2800);
-        // ----------------------------------------------------------------------------
+            setTimeout(() => splashDiv.remove(), 1000);
+        }, 2600);
+        // ------------------------------------------------------------------------
         
-        // ----------------------------- GAME CORE -------------------------------------
-        let gameRunning = true;
-        let canvas = document.getElementById('gameCanvas');
-        let ctx = canvas.getContext('2d');
+        // ------------------------- STORY MODAL -----------------------------------
+        const storyModal = document.createElement('div');
+        storyModal.className = 'story-modal';
+        storyModal.innerHTML = `
+            <div class="story-box">
+                <h1>🔻 SOVIET NIGHTMARE 🔻</h1>
+                <p>Charlie, a young researcher, was investigating abandoned Soviet bunkers in the Ural Mountains. After touching a strange emblem, he blacked out.</p>
+                <p>He wakes up in a decaying Soviet-era house. The walls whisper in Russian. Somewhere in the darkness... former officers roam, corrupted by the same curse.</p>
+                <p><strong>Find the axe. Survive. Escape.</strong></p>
+                <button id="startBtn">✦ WAKE UP, CHARLIE ✦</button>
+            </div>
+        `;
+        document.body.appendChild(storyModal);
         
-        // Game state
-        let health = 80;
-        let sanity = 100;
-        let battery = 100;
-        let flashlightOn = true;
-        let diaryCollected = 0;
-        let currentLevelIdx = 1;      // 1..5
-        let diaryPositions = [];        // per level
-        let enemies = [];
-        let ambientAudio = null;
+        let gameStarted = false;
+        let audioAllowed = false;
         let audioCtx = null;
-        let isAudioAllowed = false;
-        let gameInitialized = false;
-        let showInteractMsg = false;
-        let interactMsgText = "";
-        let interactTimer = null;
+        let ambientInterval = null;
         
-        // DLC unlock status (levels 6-10 not in base, but we store flag)
-        let dlcUnlocked = localStorage.getItem('grey_dlc_unlocked') === 'true';
+        document.getElementById('startBtn').addEventListener('click', () => {
+            storyModal.remove();
+            gameStarted = true;
+            initAudioAndGame();
+        });
         
-        // save/load system
-        function saveGame() {
-            const save = {
-                health, sanity, battery, diaryCollected, currentLevelIdx, flashlightOn,
-                dlcUnlocked
-            };
-            localStorage.setItem('grey_corridor_save', JSON.stringify(save));
+        function initAudioAndGame() {
+            // Initialize Web Audio at 100% volume
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const masterGain = audioCtx.createGain();
+            masterGain.gain.value = 1.0; // 100% volume
+            masterGain.connect(audioCtx.destination);
+            
+            // Ambient scary sounds (Soviet atmosphere)
+            ambientInterval = setInterval(() => {
+                if (!gameStarted || !audioCtx) return;
+                const now = audioCtx.currentTime;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(masterGain);
+                osc.type = 'sine';
+                osc.frequency.value = 55 + Math.random() * 30;
+                gain.gain.value = 0.08;
+                osc.start();
+                gain.gain.exponentialRampToValueAtTime(0.0001, now + 3);
+                osc.stop(now + 3);
+            }, 4500);
+            
+            // Resume audio context
+            audioCtx.resume();
+            audioAllowed = true;
+            playSfx('wakeup');
+            initGame();
         }
         
-        function loadGame() {
-            const raw = localStorage.getItem('grey_corridor_save');
-            if(!raw) return false;
-            try {
-                const data = JSON.parse(raw);
-                health = data.health ?? 80;
-                sanity = data.sanity ?? 100;
-                battery = data.battery ?? 100;
-                diaryCollected = data.diaryCollected ?? 0;
-                currentLevelIdx = data.currentLevelIdx ?? 1;
-                flashlightOn = data.flashlightOn ?? true;
-                dlcUnlocked = data.dlcUnlocked ?? false;
-                if(dlcUnlocked) localStorage.setItem('grey_dlc_unlocked','true');
-                updateUI();
-                return true;
-            } catch(e) { return false; }
-        }
-        
-        function updateUI() {
-            document.getElementById('healthFill').style.width = Math.max(0,Math.min(100,health)) + '%';
-            document.getElementById('batteryVal').innerText = Math.floor(battery);
-            document.getElementById('diaryCount').innerText = diaryCollected;
-            document.getElementById('sanity').innerText = Math.floor(sanity);
-            document.getElementById('currentLevel').innerText = currentLevelIdx;
-        }
-        
-        // ----- LEVEL DATA (realistic asylum/hospital)
-        const levelNames = ["ADMISSION WARD", "MORGUE CORRIDOR", "LOWER BASEMENT", "FORGOTTEN CHAPEL", "THE EXIT"];
-        function getLevelConfig(level){
-            let diaryPos = [];
-            const count = Math.min(5 - diaryCollected, 2 + Math.floor(Math.random()*2));
-            for(let i=0;i<count;i++){
-                diaryPos.push({x: 150 + Math.random() * (canvas.width-300), y: 80 + Math.random() * (canvas.height-160), collected:false});
+        function playSfx(type) {
+            if (!audioCtx || !audioAllowed) return;
+            const gainNode = audioCtx.createGain();
+            gainNode.gain.value = 0.6;
+            gainNode.connect(audioCtx.destination);
+            const osc = audioCtx.createOscillator();
+            osc.connect(gainNode);
+            if (type === 'wakeup') {
+                osc.frequency.value = 200;
+                gainNode.gain.value = 0.3;
+                gainNode.gain.exponentialRampToValueAtTime(0.0001, 0.8);
+                osc.start();
+                osc.stop(0.8);
+            } else if (type === 'axe') {
+                osc.frequency.value = 340;
+                gainNode.gain.value = 0.2;
+                gainNode.gain.exponentialRampToValueAtTime(0.0001, 0.4);
+                osc.start();
+                osc.stop(0.4);
+            } else if (type === 'hit') {
+                osc.frequency.value = 110;
+                gainNode.gain.value = 0.35;
+                gainNode.gain.exponentialRampToValueAtTime(0.0001, 0.25);
+                osc.start();
+                osc.stop(0.25);
+            } else if (type === 'footstep') {
+                osc.frequency.value = 80;
+                gainNode.gain.value = 0.07;
+                gainNode.gain.exponentialRampToValueAtTime(0.0001, 0.15);
+                osc.start();
+                osc.stop(0.15);
             }
-            return { diaryPositions: diaryPos, enemyCount: 2 + Math.floor(level/1.5) };
         }
         
-        let levelDiaries = [];
-        let enemiesList = [];
-        let player = { x: 0, y: 0 };
+        // ------------------------- GAME ENGINE -----------------------------------
+        const canvas = document.getElementById('gameCanvas');
+        let ctx = canvas.getContext('2d');
+        let gameRunning = true;
+        
+        // Charlie's stats
+        let charlie = {
+            x: 400, y: 300,
+            health: 100,
+            sanity: 100,
+            hasAxe: false,
+            facing: 'down',
+            moving: false,
+            running: false,
+            width: 40,
+            height: 50
+        };
+        
+        let enemies = [];
+        let axeItem = { x: 700, y: 400, collected: false, active: true };
+        let keys = { w: false, s: false, a: false, d: false, shift: false };
         let mouseX = 400, mouseY = 300;
         let attackCooldown = 0;
-        let frame = 0;
-        let gameLoopId = null;
+        let showInteract = false;
+        let interactText = "";
+        let interactTimer = null;
+        let frameCounter = 0;
         
-        // helper: spawn enemies for current level
-        function spawnEnemiesForLevel(count){
-            const newEnemies = [];
-            for(let i=0;i<count;i++){
-                let side = Math.floor(Math.random()*4);
-                let x,y;
-                if(side===0){ x = Math.random() * canvas.width; y = -60; }
-                else if(side===1){ x = canvas.width+60; y = Math.random() * canvas.height; }
-                else if(side===2){ x = Math.random() * canvas.width; y = canvas.height+60; }
-                else { x = -60; y = Math.random() * canvas.height; }
-                newEnemies.push({
-                    x, y, size: 42,
-                    hp: 3,
-                    speed: 0.55 + Math.random() * 0.4,
-                    type: 'shadow'
-                });
+        // Soviet officer enemies
+        class SovietOfficer {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.size = 45;
+                this.health = 4;
+                this.speed = 0.9;
+                this.type = 'officer';
+                this.attackTimer = 0;
             }
-            return newEnemies;
+            
+            update() {
+                const dx = charlie.x - this.x;
+                const dy = charlie.y - this.y;
+                const dist = Math.hypot(dx, dy);
+                if (dist > 0.1) {
+                    this.x += (dx / dist) * this.speed;
+                    this.y += (dy / dist) * this.speed;
+                }
+            }
+            
+            draw() {
+                ctx.save();
+                ctx.shadowBlur = 12;
+                ctx.shadowColor = '#5a1a1a';
+                // Soviet officer uniform
+                ctx.fillStyle = '#3a4a3a';
+                ctx.beginPath();
+                ctx.ellipse(this.x, this.y, this.size/1.8, this.size/1.4, 0, 0, Math.PI*2);
+                ctx.fill();
+                // Officer hat
+                ctx.fillStyle = '#2a3a2a';
+                ctx.fillRect(this.x-20, this.y-28, 40, 20);
+                ctx.fillStyle = '#aa3333';
+                ctx.fillRect(this.x-12, this.y-30, 24, 10);
+                // Face (glowing eyes)
+                ctx.fillStyle = '#ff5533';
+                ctx.beginPath();
+                ctx.arc(this.x-12, this.y-6, 5, 0, Math.PI*2);
+                ctx.arc(this.x+12, this.y-6, 5, 0, Math.PI*2);
+                ctx.fill();
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(this.x-12, this.y-8, 2, 0, Math.PI*2);
+                ctx.arc(this.x+12, this.y-8, 2, 0, Math.PI*2);
+                ctx.fill();
+                // Soviet shoulder boards
+                ctx.fillStyle = '#aa8822';
+                ctx.fillRect(this.x-28, this.y+5, 12, 8);
+                ctx.fillRect(this.x+16, this.y+5, 12, 8);
+                ctx.restore();
+            }
+            
+            takeDamage() {
+                this.health--;
+                return this.health <= 0;
+            }
         }
         
-        function resetLevel(){
-            const config = getLevelConfig(currentLevelIdx);
-            levelDiaries = config.diaryPositions.map(d => ({...d, collected:false}));
-            enemiesList = spawnEnemiesForLevel(config.enemyCount);
-            // place player safe zone center
-            player.x = canvas.width/2;
-            player.y = canvas.height/2;
-            // adjust diary unreached
-            updateUI();
-            showMessage(`📍 ${levelNames[currentLevelIdx-1]}`, 1500);
+        function spawnOfficers(count) {
+            let officers = [];
+            for (let i = 0; i < count; i++) {
+                let side = Math.floor(Math.random() * 4);
+                let x, y;
+                if (side === 0) { x = Math.random() * canvas.width; y = -80; }
+                else if (side === 1) { x = canvas.width + 80; y = Math.random() * canvas.height; }
+                else if (side === 2) { x = Math.random() * canvas.width; y = canvas.height + 80; }
+                else { x = -80; y = Math.random() * canvas.height; }
+                officers.push(new SovietOfficer(x, y));
+            }
+            return officers;
         }
         
-        function nextLevel(){
-            if(currentLevelIdx < 5){
-                currentLevelIdx++;
-                diaryCollected = 0;
-                health = Math.min(100, health+15);
-                sanity = Math.min(100, sanity+20);
-                battery = Math.min(100, battery+40);
-                flashlightOn = true;
-                saveGame();
-                resetLevel();
-                updateUI();
-                showMessage(`⬆️ ENTER LEVEL ${currentLevelIdx}: ${levelNames[currentLevelIdx-1]}`, 2000);
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            charlie.x = Math.min(Math.max(charlie.x, 40), canvas.width - 40);
+            charlie.y = Math.min(Math.max(charlie.y, 60), canvas.height - 60);
+            if (axeItem && !axeItem.collected) {
+                axeItem.x = Math.min(axeItem.x, canvas.width - 50);
+                axeItem.y = Math.min(axeItem.y, canvas.height - 50);
+            }
+        }
+        
+        function updateMovement() {
+            if (!gameStarted) return;
+            let moveX = 0, moveY = 0;
+            let speed = charlie.running ? 6.5 : 3.8;
+            if (keys.w) moveY -= 1;
+            if (keys.s) moveY += 1;
+            if (keys.a) moveX -= 1;
+            if (keys.d) moveX += 1;
+            if (moveX !== 0 || moveY !== 0) {
+                const len = Math.hypot(moveX, moveY);
+                moveX /= len;
+                moveY /= len;
+                charlie.moving = true;
+                if (frameCounter % 15 === 0) playSfx('footstep');
             } else {
-                // game beaten
-                gameRunning = false;
-                showEnding('ESCAPE');
+                charlie.moving = false;
             }
+            charlie.x += moveX * speed;
+            charlie.y += moveY * speed;
+            charlie.x = Math.min(Math.max(charlie.x, 35), canvas.width - 35);
+            charlie.y = Math.min(Math.max(charlie.y, 55), canvas.height - 55);
+            charlie.running = keys.shift && (moveX !== 0 || moveY !== 0);
         }
         
-        function attackAtMouse(){
-            if(!gameRunning) return;
+        function attackWithAxe() {
+            if (!charlie.hasAxe || attackCooldown > 0) return;
             let hit = false;
-            for(let i=0;i<enemiesList.length;i++){
-                const e = enemiesList[i];
+            for (let i = 0; i < enemies.length; i++) {
+                const e = enemies[i];
                 const dx = mouseX - e.x;
                 const dy = mouseY - e.y;
-                const dist = Math.hypot(dx,dy);
-                if(dist < e.size){
-                    e.hp -= 1;
-                    hit = true;
-                    playSfx('hit');
-                    if(e.hp <= 0){
-                        enemiesList.splice(i,1);
+                const dist = Math.hypot(dx, dy);
+                if (dist < e.size + 20) {
+                    if (e.takeDamage()) {
+                        enemies.splice(i, 1);
                         i--;
-                        sanity = Math.min(100, sanity+3);
+                        charlie.sanity = Math.min(100, charlie.sanity + 5);
                         updateUI();
                     }
+                    hit = true;
                     break;
                 }
             }
-            if(hit){
+            if (hit) {
+                attackCooldown = 12;
+                playSfx('hit');
                 ctx.save();
-                ctx.globalAlpha=0.25;
-                ctx.fillStyle='#ffffff';
-                ctx.fillRect(0,0,canvas.width,canvas.height);
+                ctx.globalAlpha = 0.3;
+                ctx.fillStyle = '#ffaa66';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
                 ctx.restore();
             }
         }
         
-        function takeDamage(amt){
-            if(!gameRunning) return;
-            health -= amt;
-            sanity -= amt*0.6;
-            if(sanity<0) sanity=0;
+        function takeDamage(amt) {
+            if (!gameStarted) return;
+            charlie.health -= amt;
+            charlie.sanity -= amt * 0.8;
+            if (charlie.sanity < 0) charlie.sanity = 0;
             updateUI();
-            playSfx('hurt');
-            // jumpscare flash
-            const flashDiv = document.createElement('div');
-            flashDiv.style.position='fixed';flashDiv.style.top=0;flashDiv.style.left=0;flashDiv.style.width='100%';flashDiv.style.height='100%';
-            flashDiv.style.backgroundColor='rgba(100,20,20,0.7)';flashDiv.style.pointerEvents='none';flashDiv.style.zIndex=150;
-            document.body.appendChild(flashDiv);
-            setTimeout(()=>flashDiv.remove(),120);
-            if(health <= 0){
-                gameRunning = false;
-                alert("❌ YOU BECAME ONE OF THE FORGOTTEN...\nGame Over. Refresh to restart.");
+            playSfx('hit');
+            // Flash red
+            const flash = document.createElement('div');
+            flash.style.position = 'fixed';
+            flash.style.top = 0;
+            flash.style.left = 0;
+            flash.style.width = '100%';
+            flash.style.height = '100%';
+            flash.style.backgroundColor = 'rgba(100,20,0,0.5)';
+            flash.style.pointerEvents = 'none';
+            flash.style.zIndex = 150;
+            document.body.appendChild(flash);
+            setTimeout(() => flash.remove(), 120);
+            if (charlie.health <= 0) {
+                gameStarted = false;
+                alert("💀 CHARLIE DIED... The Soviet curse claims another soul. Refresh to try again.");
                 location.reload();
             }
         }
         
-        function collectDiary(index){
-            if(!levelDiaries[index] || levelDiaries[index].collected) return;
-            levelDiaries[index].collected = true;
-            diaryCollected++;
-            updateUI();
-            playSfx('diary');
-            showMessage("📖 Diary fragment found. +Sanity", 1200);
-            sanity = Math.min(100, sanity+12);
-            if(diaryCollected >= 5){
-                showMessage("🚪 All memories restored! Find the EXIT door!", 2000);
-                // spawn exit marker
-                if(!window.exitSpawned){
-                    window.exitSpawned = true;
-                    window.exitDoor = { x: canvas.width-120, y: canvas.height-90, active: true };
-                }
-            }
-            saveGame();
+        function updateUI() {
+            document.getElementById('healthFill').style.width = Math.max(0, charlie.health) + '%';
+            document.getElementById('axeStatus').innerHTML = charlie.hasAxe ? '🪓 AXE READY' : '❌ NO AXE';
+            document.getElementById('sanityVal').innerHTML = Math.floor(charlie.sanity);
+            document.getElementById('invItem').innerHTML = charlie.hasAxe ? '🪓 Woodcutter Axe' : '---';
         }
         
-        function showMessage(msg, duration){
+        function showMessage(msg, duration) {
             const msgDiv = document.getElementById('interactMsg');
             msgDiv.innerText = msg;
             msgDiv.classList.remove('hidden');
-            if(interactTimer) clearTimeout(interactTimer);
-            interactTimer = setTimeout(()=>{
-                msgDiv.classList.add('hidden');
-            }, duration);
+            if (interactTimer) clearTimeout(interactTimer);
+            interactTimer = setTimeout(() => msgDiv.classList.add('hidden'), duration);
         }
         
-        function checkExitInteraction(){
-            if(window.exitDoor && window.exitDoor.active && diaryCollected>=5){
-                const dx = mouseX - window.exitDoor.x;
-                const dy = mouseY - window.exitDoor.y;
-                if(Math.hypot(dx,dy) < 45){
-                    showMessage("🔓 PRESS [E] TO ESCAPE", 500);
+        function drawCharlie() {
+            ctx.save();
+            ctx.shadowBlur = 0;
+            // Charlie's body (full human)
+            ctx.fillStyle = '#6a7a6e';
+            ctx.beginPath();
+            ctx.ellipse(charlie.x, charlie.y-8, 18, 24, 0, 0, Math.PI*2);
+            ctx.fill();
+            ctx.fillStyle = '#d4bc8a';
+            ctx.beginPath();
+            ctx.arc(charlie.x, charlie.y-20, 14, 0, Math.PI*2);
+            ctx.fill();
+            // Hair
+            ctx.fillStyle = '#5a4a3a';
+            ctx.fillRect(charlie.x-12, charlie.y-32, 24, 12);
+            // Jacket
+            ctx.fillStyle = '#4a5a4a';
+            ctx.fillRect(charlie.x-18, charlie.y-6, 36, 30);
+            // Axe in hand if equipped
+            if (charlie.hasAxe) {
+                ctx.fillStyle = '#8a6a3a';
+                ctx.fillRect(charlie.x+15, charlie.y-12, 28, 8);
+                ctx.fillStyle = '#aaaaaa';
+                ctx.fillRect(charlie.x+38, charlie.y-15, 12, 14);
+            }
+            ctx.restore();
+        }
+        
+        function drawAxeItem() {
+            if (!axeItem.collected && axeItem.active) {
+                ctx.fillStyle = '#b87a3a';
+                ctx.shadowBlur = 12;
+                ctx.fillRect(axeItem.x-8, axeItem.y-4, 40, 12);
+                ctx.fillStyle = '#6a4a2a';
+                ctx.fillRect(axeItem.x+10, axeItem.y-12, 12, 28);
+                ctx.fillStyle = '#cca86a';
+                ctx.font = "bold 24px monospace";
+                ctx.fillText("🪓", axeItem.x-6, axeItem.y+4);
+                ctx.fillStyle = '#eeddaa';
+                ctx.font = "12px monospace";
+                ctx.fillText("Soviet Axe", axeItem.x-10, axeItem.y+20);
+            }
+        }
+        
+        function checkAxePickup() {
+            if (!axeItem.collected && axeItem.active) {
+                const dx = charlie.x - axeItem.x;
+                const dy = charlie.y - axeItem.y;
+                if (Math.hypot(dx, dy) < 45) {
+                    showMessage("🔺 Press E to pick up AXE 🔺", 1500);
                     return true;
                 }
             }
             return false;
         }
         
-        // Sound generation (Web Audio - realistic/horror)
-        function initAudio(){
-            if(audioCtx) return;
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            ambientAudio = setInterval(()=>{
-                if(!gameRunning || !audioCtx || !isAudioAllowed) return;
-                const now = audioCtx.currentTime;
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.type = 'sine';
-                const baseFreq = 65 + (sanity<30 ? 15 : 0) + Math.sin(Date.now()*0.001)*2;
-                osc.frequency.value = baseFreq;
-                gain.gain.value = 0.07;
-                osc.start();
-                gain.gain.exponentialRampToValueAtTime(0.0001, now+2.5);
-                osc.stop(now+2.5);
-            }, 3800);
-        }
-        
-        function playSfx(type){
-            if(!audioCtx || !isAudioAllowed) return;
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            if(type === 'hit'){
-                osc.frequency.value = 180;
-                gain.gain.value = 0.1;
-                gain.gain.exponentialRampToValueAtTime(0.0001, 0.3);
-                osc.start();
-                osc.stop(0.3);
-            } else if(type === 'hurt'){
-                osc.frequency.value = 90;
-                gain.gain.value = 0.2;
-                gain.gain.exponentialRampToValueAtTime(0.0001, 0.7);
-                osc.start();
-                osc.stop(0.7);
-                // additional noise
-                const noise = audioCtx.createBufferSource();
-                const buffer = audioCtx.createBuffer(1, 4000, audioCtx.sampleRate);
-                const data = buffer.getChannelData(0);
-                for(let i=0;i<4000;i++) data[i] = Math.random()*0.2;
-                noise.buffer = buffer;
-                const noiseGain = audioCtx.createGain();
-                noise.connect(noiseGain);
-                noiseGain.connect(audioCtx.destination);
-                noiseGain.gain.value = 0.08;
-                noise.start();
-                noise.stop(0.4);
-            } else if(type === 'diary'){
-                osc.frequency.value = 440;
-                gain.gain.value = 0.06;
-                gain.gain.exponentialRampToValueAtTime(0.0001, 0.6);
-                osc.start();
-                osc.stop(0.6);
-            }
-        }
-        
-        function drawRealistic(){
-            if(!ctx) return;
-            ctx.clearRect(0,0,canvas.width,canvas.height);
-            // grunge background
-            const grad = ctx.createLinearGradient(0,0,canvas.width,canvas.height);
-            grad.addColorStop(0,'#14181c');
-            grad.addColorStop(1,'#0b0e10');
-            ctx.fillStyle=grad;
-            ctx.fillRect(0,0,canvas.width,canvas.height);
-            
-            // draw walls / grid lines (asylum tiles)
-            ctx.strokeStyle = '#2a3228';
-            ctx.lineWidth = 1;
-            for(let i=0;i<canvas.width;i+=80){
-                ctx.beginPath();
-                ctx.moveTo(i,0);
-                ctx.lineTo(i,canvas.height);
-                ctx.stroke();
-                ctx.beginPath();
-                ctx.moveTo(0,i%canvas.height);
-                ctx.lineTo(canvas.width,i%canvas.height);
-                ctx.stroke();
-            }
-            
-            // draw diary pages
-            for(let i=0;i<levelDiaries.length;i++){
-                if(!levelDiaries[i].collected){
-                    ctx.fillStyle = '#dac28c';
-                    ctx.shadowBlur=8;
-                    ctx.font = "bold 26px monospace";
-                    ctx.fillText("📜", levelDiaries[i].x-10, levelDiaries[i].y-8);
-                    ctx.fillStyle = "#ad9e70";
-                    ctx.font = "12px monospace";
-                    ctx.fillText("old note", levelDiaries[i].x-5, levelDiaries[i].y+8);
-                }
-            }
-            
-            // draw exit door
-            if(window.exitDoor && window.exitDoor.active && diaryCollected>=5){
-                ctx.fillStyle = '#5e3e2e';
-                ctx.fillRect(window.exitDoor.x-25, window.exitDoor.y-40, 50, 80);
-                ctx.fillStyle = '#b97f5a';
-                ctx.fillRect(window.exitDoor.x-10, window.exitDoor.y-20, 20, 40);
-                ctx.fillStyle = "#ffcc77";
-                ctx.font = "bold 20px monospace";
-                ctx.fillText("🚪", window.exitDoor.x-12, window.exitDoor.y-10);
-            }
-            
-            // draw enemies (shadow beings)
-            for(let e of enemiesList){
-                ctx.shadowBlur = 20;
-                ctx.shadowColor = '#a22';
-                ctx.fillStyle = '#201a18';
-                ctx.beginPath();
-                ctx.ellipse(e.x, e.y, e.size/1.6, e.size/1.2, 0, 0, Math.PI*2);
-                ctx.fill();
-                ctx.fillStyle = '#632a2a';
-                ctx.beginPath();
-                ctx.arc(e.x-12, e.y-6, 6, 0, Math.PI*2);
-                ctx.arc(e.x+12, e.y-6, 6, 0, Math.PI*2);
-                ctx.fill();
-                ctx.fillStyle = '#aa4433';
-                ctx.beginPath();
-                ctx.arc(e.x-12+Math.sin(Date.now()*0.01)*1.2, e.y-8, 2,0,Math.PI*2);
-                ctx.arc(e.x+12+Math.sin(Date.now()*0.01)*1.2, e.y-8, 2,0,Math.PI*2);
-                ctx.fill();
-            }
-            
-            // flashlight cone
-            if(flashlightOn && battery>0){
-                ctx.save();
-                ctx.globalCompositeOperation = 'lighter';
-                const angle = Math.atan2(mouseY - player.y, mouseX - player.x);
-                const coneLen = 280;
-                ctx.beginPath();
-                ctx.moveTo(player.x, player.y);
-                ctx.arc(player.x, player.y, coneLen, angle-0.9, angle+0.9);
-                ctx.fillStyle = 'rgba(210,200,130,0.22)';
-                ctx.fill();
-                ctx.restore();
-            }
-            
-            // crosshair
-            ctx.strokeStyle = '#f2d98b';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(mouseX-14,mouseY);
-            ctx.lineTo(mouseX-5,mouseY);
-            ctx.moveTo(mouseX+5,mouseY);
-            ctx.lineTo(mouseX+14,mouseY);
-            ctx.moveTo(mouseX,mouseY-14);
-            ctx.lineTo(mouseX,mouseY-5);
-            ctx.moveTo(mouseX,mouseY+5);
-            ctx.lineTo(mouseX,mouseY+14);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.arc(mouseX,mouseY,10,0,Math.PI*2);
-            ctx.stroke();
-            
-            // sanity vignette
-            if(sanity<50){
-                const vig = ctx.createRadialGradient(canvas.width/2,canvas.height/2,50,canvas.width/2,canvas.height/2,canvas.width/1.6);
-                vig.addColorStop(0,'rgba(0,0,0,0)');
-                vig.addColorStop(1,'rgba(0,0,0,0.7)');
-                ctx.fillStyle=vig;
-                ctx.fillRect(0,0,canvas.width,canvas.height);
-            }
-            ctx.shadowBlur=0;
-        }
-        
-        function updateGame(){
-            if(!gameRunning) return;
-            // battery
-            if(flashlightOn && battery>0){
-                battery -= 0.22;
-                if(battery<=0){ battery=0; flashlightOn=false; }
-                updateUI();
-            } else if(!flashlightOn && battery<100){
-                battery += 0.08;
-                updateUI();
-            }
-            // enemy movement and collision
-            for(let i=0;i<enemiesList.length;i++){
-                const e = enemiesList[i];
-                const dx = player.x - e.x, dy = player.y - e.y;
-                const dist = Math.hypot(dx,dy);
-                if(dist>0.1){
-                    e.x += (dx/dist)*e.speed;
-                    e.y += (dy/dist)*e.speed;
-                }
-                const distToMouse = Math.hypot(mouseX - e.x, mouseY - e.y);
-                if(distToMouse < e.size+8){
-                    takeDamage(12);
-                    enemiesList.splice(i,1);
+        function updateEnemies() {
+            for (let i = 0; i < enemies.length; i++) {
+                enemies[i].update();
+                const dx = charlie.x - enemies[i].x;
+                const dy = charlie.y - enemies[i].y;
+                const dist = Math.hypot(dx, dy);
+                if (dist < enemies[i].size) {
+                    takeDamage(14);
+                    enemies.splice(i, 1);
                     i--;
                 }
             }
-            // diary collect interaction
-            for(let i=0;i<levelDiaries.length;i++){
-                if(!levelDiaries[i].collected){
-                    const dx = mouseX - levelDiaries[i].x;
-                    const dy = mouseY - levelDiaries[i].y;
-                    if(Math.hypot(dx,dy)<35){
-                        showMessage("📖 [CLICK] to read diary", 400);
-                        // click handler integrated
-                    }
-                }
+            // Spawn more if needed
+            if (frameCounter % 140 === 0 && enemies.length < 4 && charlie.hasAxe) {
+                enemies.push(...spawnOfficers(1));
+            } else if (frameCounter % 200 === 0 && enemies.length < 2 && !charlie.hasAxe) {
+                enemies.push(...spawnOfficers(1));
             }
-            if(attackCooldown>0) attackCooldown--;
-            // auto enemy spawn random for tension
-            if(frame%90===0 && enemiesList.length<5 && Math.random()<0.45){
-                let side = Math.floor(Math.random()*4);
-                let x,y;
-                if(side===0){ x = Math.random()*canvas.width; y = -50; }
-                else if(side===1){ x=canvas.width+50; y=Math.random()*canvas.height; }
-                else if(side===2){ x=Math.random()*canvas.width; y=canvas.height+50; }
-                else { x=-50; y=Math.random()*canvas.height; }
-                enemiesList.push({x,y,size:40,hp:3,speed:0.6+Math.random()*0.3,type:'shadow'});
-            }
-            frame++;
         }
         
-        function animate(){
-            if(!gameRunning) return;
-            updateGame();
-            drawRealistic();
-            requestAnimationFrame(animate);
-        }
-        
-        // Event listeners
-        function resizeCanvas(){
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            player.x = canvas.width/2;
-            player.y = canvas.height/2;
-            if(window.exitDoor){
-                window.exitDoor.x = canvas.width-120;
-                window.exitDoor.y = canvas.height-90;
+        function drawHouseBackground() {
+            const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            grad.addColorStop(0, '#1c201a');
+            grad.addColorStop(1, '#0e120e');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            // Wooden floor boards
+            ctx.strokeStyle = '#3a362a';
+            ctx.lineWidth = 2;
+            for (let i = 0; i < canvas.height; i += 48) {
+                ctx.beginPath();
+                ctx.moveTo(0, i);
+                ctx.lineTo(canvas.width, i);
+                ctx.stroke();
             }
-            resetLevel();
+            // Window silhouettes
+            ctx.fillStyle = '#1e261a';
+            ctx.fillRect(60, 40, 100, 80);
+            ctx.fillRect(canvas.width-160, 40, 100, 80);
         }
         
-        function initGame(){
-            canvas = document.getElementById('gameCanvas');
-            ctx = canvas.getContext('2d');
-            resizeCanvas();
-            window.addEventListener('resize',()=>{
-                resizeCanvas();
-                resetLevel();
-            });
-            canvas.addEventListener('mousemove',(e)=>{
-                const rect = canvas.getBoundingClientRect();
-                mouseX = e.clientX - rect.left;
-                mouseY = e.clientY - rect.top;
-            });
-            canvas.addEventListener('click',(e)=>{
-                if(!gameRunning) return;
-                // diary collection
-                for(let i=0;i<levelDiaries.length;i++){
-                    if(!levelDiaries[i].collected){
-                        const dx = mouseX - levelDiaries[i].x;
-                        const dy = mouseY - levelDiaries[i].y;
-                        if(Math.hypot(dx,dy)<40){
-                            collectDiary(i);
-                            break;
-                        }
-                    }
-                }
-                // exit door click
-                if(window.exitDoor && window.exitDoor.active && diaryCollected>=5){
-                    const dx = mouseX - window.exitDoor.x;
-                    const dy = mouseY - window.exitDoor.y;
-                    if(Math.hypot(dx,dy)<55){
-                        nextLevel();
-                        return;
-                    }
-                }
-                attackAtMouse();
-            });
-            window.addEventListener('keydown',(e)=>{
-                if(e.code === 'Space'){
-                    e.preventDefault();
-                    flashlightOn = !flashlightOn;
-                    playSfx('hit');
-                    showMessage(flashlightOn ? "🔦 FLASHLIGHT ON" : "💡 FLASHLIGHT OFF", 500);
-                }
-                if(e.code === 'KeyE' && window.exitDoor && window.exitDoor.active && diaryCollected>=5){
-                    const dx = mouseX - window.exitDoor.x;
-                    const dy = mouseY - window.exitDoor.y;
-                    if(Math.hypot(dx,dy)<55) nextLevel();
-                }
-            });
-            // audio unlock on first click
-            canvas.addEventListener('click',()=>{
-                if(!isAudioAllowed){
-                    isAudioAllowed=true;
-                    initAudio();
-                    if(audioCtx) audioCtx.resume();
-                    playSfx('diary');
-                    showMessage("🎧 AUDIO INITIALIZED | dread approaches", 1500);
-                }
-            },{once:true});
+        function gameLoop() {
+            if (!gameStarted) return;
+            updateMovement();
+            if (attackCooldown > 0) attackCooldown--;
+            updateEnemies();
+            checkAxePickup();
             
-            loadGame();
-            resetLevel();
-            updateUI();
-            gameRunning=true;
-            animate();
-            setInterval(()=>{ if(gameRunning) saveGame(); }, 15000);
+            // Draw everything
+            drawHouseBackground();
+            drawAxeItem();
+            for (let e of enemies) e.draw();
+            drawCharlie();
+            
+            // Crosshair and flashlight effect
+            ctx.strokeStyle = '#ffcc88';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(mouseX-12, mouseY);
+            ctx.lineTo(mouseX-4, mouseY);
+            ctx.moveTo(mouseX+4, mouseY);
+            ctx.lineTo(mouseX+12, mouseY);
+            ctx.moveTo(mouseX, mouseY-12);
+            ctx.lineTo(mouseX, mouseY-4);
+            ctx.moveTo(mouseX, mouseY+4);
+            ctx.lineTo(mouseX, mouseY+12);
+            ctx.stroke();
+            
+            frameCounter++;
+            requestAnimationFrame(gameLoop);
         }
         
-        function showEnding(ending){
-            gameRunning=false;
-            const overlay = document.createElement('div');
-            overlay.style.position='fixed';overlay.style.top=0;overlay.style.left=0;overlay.style.width='100%';overlay.style.height='100%';
-            overlay.style.backgroundColor='#0a0c0cee';overlay.style.zIndex=300;overlay.style.display='flex';overlay.style.justifyContent='center';overlay.style.alignItems='center';
-            overlay.style.flexDirection='column';overlay.style.fontFamily='monospace';overlay.style.color='#bba98a';
-            overlay.innerHTML = `<h2>✦ ${ending === 'ESCAPE' ? 'ESCAPE ENDING' : 'THE FORGOTTEN'} ✦</h2>
-            <p style="margin:20px">${ending === 'ESCAPE' ? 'You escaped the Grey Corridor. But some memories stay buried.' : 'You faded into the walls... forever.'}</p>
-            <p style="font-size:12px">- NEXUS PLAY -</p>
-            <button id="restartBtn" style="margin-top:30px;background:#2a2e2a;border:1px solid #6a7a5a;color:#eee;padding:8px 24px;">RESTART GAME</button>`;
-            document.body.appendChild(overlay);
-            document.getElementById('restartBtn').onclick = ()=>location.reload();
+        // Event Listeners
+        window.addEventListener('resize', () => { resizeCanvas(); });
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            mouseX = e.clientX - rect.left;
+            mouseY = e.clientY - rect.top;
+        });
+        canvas.addEventListener('click', () => {
+            if (!gameStarted) return;
+            attackWithAxe();
+        });
+        window.addEventListener('keydown', (e) => {
+            const key = e.key.toLowerCase();
+            if (key === 'w') keys.w = true;
+            if (key === 's') keys.s = true;
+            if (key === 'a') keys.a = true;
+            if (key === 'd') keys.d = true;
+            if (key === 'shift') keys.shift = true;
+            if (key === 'e' && !axeItem.collected && axeItem.active) {
+                const dx = charlie.x - axeItem.x;
+                const dy = charlie.y - axeItem.y;
+                if (Math.hypot(dx, dy) < 55) {
+                    axeItem.collected = true;
+                    charlie.hasAxe = true;
+                    playSfx('axe');
+                    showMessage("🪓 AXE EQUIPPED! Left click to attack officers.", 2000);
+                    updateUI();
+                }
+            }
+        });
+        window.addEventListener('keyup', (e) => {
+            const key = e.key.toLowerCase();
+            if (key === 'w') keys.w = false;
+            if (key === 's') keys.s = false;
+            if (key === 'a') keys.a = false;
+            if (key === 'd') keys.d = false;
+            if (key === 'shift') keys.shift = false;
+        });
+        
+        function initGame() {
+            resizeCanvas();
+            charlie.x = canvas.width/2;
+            charlie.y = canvas.height/2;
+            axeItem = { x: canvas.width-140, y: canvas.height-130, collected: false, active: true };
+            enemies = spawnOfficers(2);
+            updateUI();
+            gameLoop();
+            setInterval(() => {
+                if (gameStarted) {
+                    updateUI();
+                }
+            }, 100);
+            showMessage("🔦 WASD to move, Shift to run, Click to attack with axe", 4000);
         }
+        
+        // Start audio context on first user interaction
+        canvas.addEventListener('click', () => {
+            if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+        }, { once: false });
     })();
 </script>
 </body>
