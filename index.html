@@ -46,9 +46,10 @@
             z-index: 20;
             font-family: 'Courier New', monospace;
             pointer-events: none;
-            background: rgba(0,0,0,0.6);
+            background: rgba(0,0,0,0.7);
             padding: 8px 16px;
             border-left: 3px solid #8b0000;
+            color: #eeddcc;
         }
 
         #healthBar {
@@ -74,7 +75,7 @@
             bottom: 30px;
             right: 20px;
             text-align: center;
-            min-width: 120px;
+            min-width: 140px;
         }
 
         .interact-message {
@@ -95,14 +96,14 @@
             border: 1px solid #aa6a3a;
         }
 
-        /* Story Modal */
+        /* Story Modal - FIXED with visible button */
         .story-modal {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.95);
+            background: rgba(0,0,0,0.96);
             z-index: 200;
             display: flex;
             justify-content: center;
@@ -113,41 +114,49 @@
 
         .story-box {
             background: #1a1410;
-            border: 2px solid #6a2a1a;
+            border: 3px solid #8a3a1a;
             padding: 40px 50px;
-            max-width: 600px;
+            max-width: 650px;
             text-align: center;
             color: #d4c4aa;
-            box-shadow: 0 0 40px rgba(0,0,0,0.8);
+            box-shadow: 0 0 50px rgba(0,0,0,0.9);
+            border-radius: 8px;
         }
 
         .story-box h1 {
-            color: #aa4a2a;
+            color: #cc5533;
             margin-bottom: 25px;
             letter-spacing: 3px;
+            font-size: 28px;
         }
 
         .story-box p {
             font-size: 18px;
             line-height: 1.6;
             margin: 20px 0;
+            text-align: left;
         }
 
         .story-box button {
-            margin-top: 25px;
-            padding: 10px 30px;
-            background: #3a2a1a;
-            border: 1px solid #8a5a3a;
-            color: #eeddbb;
+            margin-top: 30px;
+            padding: 12px 40px;
+            background: #5a2a1a;
+            border: 2px solid #cc8844;
+            color: #ffeedd;
             font-family: monospace;
-            font-size: 16px;
+            font-size: 20px;
+            font-weight: bold;
             cursor: pointer;
             transition: 0.2s;
+            border-radius: 40px;
+            letter-spacing: 2px;
         }
 
         .story-box button:hover {
-            background: #5a3a2a;
-            border-color: #cc8844;
+            background: #8a3a1a;
+            border-color: #ffaa66;
+            transform: scale(1.02);
+            box-shadow: 0 0 15px rgba(200,80,0,0.5);
         }
 
         .hidden {
@@ -240,7 +249,7 @@
         }, 2600);
         // ------------------------------------------------------------------------
         
-        // ------------------------- STORY MODAL -----------------------------------
+        // ------------------------- STORY MODAL (BUTTON VISIBLE) -----------------
         const storyModal = document.createElement('div');
         storyModal.className = 'story-modal';
         storyModal.innerHTML = `
@@ -249,7 +258,7 @@
                 <p>Charlie, a young researcher, was investigating abandoned Soviet bunkers in the Ural Mountains. After touching a strange emblem, he blacked out.</p>
                 <p>He wakes up in a decaying Soviet-era house. The walls whisper in Russian. Somewhere in the darkness... former officers roam, corrupted by the same curse.</p>
                 <p><strong>Find the axe. Survive. Escape.</strong></p>
-                <button id="startBtn">✦ WAKE UP, CHARLIE ✦</button>
+                <button id="wakeUpBtn">⚡ WAKE UP, CHARLIE ⚡</button>
             </div>
         `;
         document.body.appendChild(storyModal);
@@ -259,20 +268,27 @@
         let audioCtx = null;
         let ambientInterval = null;
         
-        document.getElementById('startBtn').addEventListener('click', () => {
-            storyModal.remove();
-            gameStarted = true;
-            initAudioAndGame();
-        });
+        // FIXED: Button click handler
+        const wakeBtn = document.getElementById('wakeUpBtn');
+        if (wakeBtn) {
+            wakeBtn.addEventListener('click', () => {
+                console.log("Button clicked! Starting game...");
+                storyModal.remove();
+                gameStarted = true;
+                initAudioAndGame();
+            });
+        } else {
+            console.error("Button not found!");
+        }
         
         function initAudioAndGame() {
             // Initialize Web Audio at 100% volume
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             const masterGain = audioCtx.createGain();
-            masterGain.gain.value = 1.0; // 100% volume
+            masterGain.gain.value = 1.0;
             masterGain.connect(audioCtx.destination);
             
-            // Ambient scary sounds (Soviet atmosphere)
+            // Ambient scary sounds
             ambientInterval = setInterval(() => {
                 if (!gameStarted || !audioCtx) return;
                 const now = audioCtx.currentTime;
@@ -288,7 +304,6 @@
                 osc.stop(now + 3);
             }, 4500);
             
-            // Resume audio context
             audioCtx.resume();
             audioAllowed = true;
             playSfx('wakeup');
@@ -332,7 +347,6 @@
         // ------------------------- GAME ENGINE -----------------------------------
         const canvas = document.getElementById('gameCanvas');
         let ctx = canvas.getContext('2d');
-        let gameRunning = true;
         
         // Charlie's stats
         let charlie = {
@@ -340,7 +354,6 @@
             health: 100,
             sanity: 100,
             hasAxe: false,
-            facing: 'down',
             moving: false,
             running: false,
             width: 40,
@@ -352,12 +365,9 @@
         let keys = { w: false, s: false, a: false, d: false, shift: false };
         let mouseX = 400, mouseY = 300;
         let attackCooldown = 0;
-        let showInteract = false;
-        let interactText = "";
-        let interactTimer = null;
         let frameCounter = 0;
+        let interactTimer = null;
         
-        // Soviet officer enemies
         class SovietOfficer {
             constructor(x, y) {
                 this.x = x;
@@ -365,8 +375,6 @@
                 this.size = 45;
                 this.health = 4;
                 this.speed = 0.9;
-                this.type = 'officer';
-                this.attackTimer = 0;
             }
             
             update() {
@@ -383,17 +391,14 @@
                 ctx.save();
                 ctx.shadowBlur = 12;
                 ctx.shadowColor = '#5a1a1a';
-                // Soviet officer uniform
                 ctx.fillStyle = '#3a4a3a';
                 ctx.beginPath();
                 ctx.ellipse(this.x, this.y, this.size/1.8, this.size/1.4, 0, 0, Math.PI*2);
                 ctx.fill();
-                // Officer hat
                 ctx.fillStyle = '#2a3a2a';
                 ctx.fillRect(this.x-20, this.y-28, 40, 20);
                 ctx.fillStyle = '#aa3333';
                 ctx.fillRect(this.x-12, this.y-30, 24, 10);
-                // Face (glowing eyes)
                 ctx.fillStyle = '#ff5533';
                 ctx.beginPath();
                 ctx.arc(this.x-12, this.y-6, 5, 0, Math.PI*2);
@@ -404,7 +409,6 @@
                 ctx.arc(this.x-12, this.y-8, 2, 0, Math.PI*2);
                 ctx.arc(this.x+12, this.y-8, 2, 0, Math.PI*2);
                 ctx.fill();
-                // Soviet shoulder boards
                 ctx.fillStyle = '#aa8822';
                 ctx.fillRect(this.x-28, this.y+5, 12, 8);
                 ctx.fillRect(this.x+16, this.y+5, 12, 8);
@@ -454,10 +458,7 @@
                 const len = Math.hypot(moveX, moveY);
                 moveX /= len;
                 moveY /= len;
-                charlie.moving = true;
-                if (frameCounter % 15 === 0) playSfx('footstep');
-            } else {
-                charlie.moving = false;
+                if (frameCounter % 20 === 0) playSfx('footstep');
             }
             charlie.x += moveX * speed;
             charlie.y += moveY * speed;
@@ -503,7 +504,6 @@
             if (charlie.sanity < 0) charlie.sanity = 0;
             updateUI();
             playSfx('hit');
-            // Flash red
             const flash = document.createElement('div');
             flash.style.position = 'fixed';
             flash.style.top = 0;
@@ -517,7 +517,7 @@
             setTimeout(() => flash.remove(), 120);
             if (charlie.health <= 0) {
                 gameStarted = false;
-                alert("💀 CHARLIE DIED... The Soviet curse claims another soul. Refresh to try again.");
+                alert("💀 CHARLIE DIED... Refresh to try again.");
                 location.reload();
             }
         }
@@ -539,8 +539,6 @@
         
         function drawCharlie() {
             ctx.save();
-            ctx.shadowBlur = 0;
-            // Charlie's body (full human)
             ctx.fillStyle = '#6a7a6e';
             ctx.beginPath();
             ctx.ellipse(charlie.x, charlie.y-8, 18, 24, 0, 0, Math.PI*2);
@@ -549,13 +547,10 @@
             ctx.beginPath();
             ctx.arc(charlie.x, charlie.y-20, 14, 0, Math.PI*2);
             ctx.fill();
-            // Hair
             ctx.fillStyle = '#5a4a3a';
             ctx.fillRect(charlie.x-12, charlie.y-32, 24, 12);
-            // Jacket
             ctx.fillStyle = '#4a5a4a';
             ctx.fillRect(charlie.x-18, charlie.y-6, 36, 30);
-            // Axe in hand if equipped
             if (charlie.hasAxe) {
                 ctx.fillStyle = '#8a6a3a';
                 ctx.fillRect(charlie.x+15, charlie.y-12, 28, 8);
@@ -568,14 +563,12 @@
         function drawAxeItem() {
             if (!axeItem.collected && axeItem.active) {
                 ctx.fillStyle = '#b87a3a';
-                ctx.shadowBlur = 12;
                 ctx.fillRect(axeItem.x-8, axeItem.y-4, 40, 12);
                 ctx.fillStyle = '#6a4a2a';
                 ctx.fillRect(axeItem.x+10, axeItem.y-12, 12, 28);
-                ctx.fillStyle = '#cca86a';
-                ctx.font = "bold 24px monospace";
-                ctx.fillText("🪓", axeItem.x-6, axeItem.y+4);
                 ctx.fillStyle = '#eeddaa';
+                ctx.font = "bold 20px monospace";
+                ctx.fillText("🪓", axeItem.x-6, axeItem.y+4);
                 ctx.font = "12px monospace";
                 ctx.fillText("Soviet Axe", axeItem.x-10, axeItem.y+20);
             }
@@ -585,7 +578,7 @@
             if (!axeItem.collected && axeItem.active) {
                 const dx = charlie.x - axeItem.x;
                 const dy = charlie.y - axeItem.y;
-                if (Math.hypot(dx, dy) < 45) {
+                if (Math.hypot(dx, dy) < 55) {
                     showMessage("🔺 Press E to pick up AXE 🔺", 1500);
                     return true;
                 }
@@ -605,10 +598,9 @@
                     i--;
                 }
             }
-            // Spawn more if needed
-            if (frameCounter % 140 === 0 && enemies.length < 4 && charlie.hasAxe) {
+            if (frameCounter % 160 === 0 && enemies.length < 4 && charlie.hasAxe) {
                 enemies.push(...spawnOfficers(1));
-            } else if (frameCounter % 200 === 0 && enemies.length < 2 && !charlie.hasAxe) {
+            } else if (frameCounter % 220 === 0 && enemies.length < 2 && !charlie.hasAxe) {
                 enemies.push(...spawnOfficers(1));
             }
         }
@@ -619,7 +611,6 @@
             grad.addColorStop(1, '#0e120e');
             ctx.fillStyle = grad;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            // Wooden floor boards
             ctx.strokeStyle = '#3a362a';
             ctx.lineWidth = 2;
             for (let i = 0; i < canvas.height; i += 48) {
@@ -628,7 +619,6 @@
                 ctx.lineTo(canvas.width, i);
                 ctx.stroke();
             }
-            // Window silhouettes
             ctx.fillStyle = '#1e261a';
             ctx.fillRect(60, 40, 100, 80);
             ctx.fillRect(canvas.width-160, 40, 100, 80);
@@ -641,13 +631,11 @@
             updateEnemies();
             checkAxePickup();
             
-            // Draw everything
             drawHouseBackground();
             drawAxeItem();
             for (let e of enemies) e.draw();
             drawCharlie();
             
-            // Crosshair and flashlight effect
             ctx.strokeStyle = '#ffcc88';
             ctx.lineWidth = 2;
             ctx.beginPath();
@@ -666,7 +654,7 @@
         }
         
         // Event Listeners
-        window.addEventListener('resize', () => { resizeCanvas(); });
+        window.addEventListener('resize', () => resizeCanvas());
         canvas.addEventListener('mousemove', (e) => {
             const rect = canvas.getBoundingClientRect();
             mouseX = e.clientX - rect.left;
@@ -686,7 +674,7 @@
             if (key === 'e' && !axeItem.collected && axeItem.active) {
                 const dx = charlie.x - axeItem.x;
                 const dy = charlie.y - axeItem.y;
-                if (Math.hypot(dx, dy) < 55) {
+                if (Math.hypot(dx, dy) < 65) {
                     axeItem.collected = true;
                     charlie.hasAxe = true;
                     playSfx('axe');
@@ -712,18 +700,12 @@
             enemies = spawnOfficers(2);
             updateUI();
             gameLoop();
-            setInterval(() => {
-                if (gameStarted) {
-                    updateUI();
-                }
-            }, 100);
             showMessage("🔦 WASD to move, Shift to run, Click to attack with axe", 4000);
         }
         
-        // Start audio context on first user interaction
         canvas.addEventListener('click', () => {
             if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-        }, { once: false });
+        });
     })();
 </script>
 </body>
