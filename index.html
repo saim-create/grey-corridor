@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>The Grey Corridor - NEXUS PLAY</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            background: #0a0c0e;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Courier New', 'Segoe UI', monospace;
+            overflow: hidden;
+        }
+
+        /* Game container */
+        .game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            overflow: hidden;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+            cursor: crosshair;
+        }
+
+        /* UI overlays */
+        .ui-panel {
+            position: absolute;
+            z-index: 20;
+            pointer-events: none;
+            font-family: 'Courier New', monospace;
+        }
+
+        #healthBarContainer {
+            bottom: 30px;
+            left: 20px;
+            width: 220px;
+            background: #1a1f22;
+            border: 1px solid #4a3a2a;
+            border-radius: 4px;
+            padding: 2px;
+        }
+
+        #healthFill {
+            height: 12px;
+            background: #6a2a2a;
+            width: 100%;
+            transition: width 0.2s;
+            box-shadow: 0 0 4px #c44;
+        }
+
+        #stats {
+            top: 20px;
+            right: 20px;
+            text-align: right;
+            background: rgba(0,0,0,0.65);
+            padding: 8px 14px;
+            border-left: 3px solid #5a4a3a;
+            font-size: 14px;
+            letter-spacing: 1px;
+            backdrop-filter: blur(4px);
+        }
+
+        #stats span {
+            color: #bc9a6c;
+            font-weight: bold;
+        }
+
+        #levelText {
+            bottom: 30px;
+            right: 20px;
+            background: rgba(0,0,0,0.5);
+            padding: 4px 12px;
+            font-size: 12px;
+            color: #9a8a7a;
+        }
+
+        .interact-message {
+            position: absolute;
+            bottom: 35%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #000000aa;
+            color: #ddccaa;
+            padding: 8px 18px;
+            font-size: 14px;
+            border-radius: 20px;
+            font-weight: bold;
+            backdrop-filter: blur(8px);
+            white-space: nowrap;
+            pointer-events: none;
+            z-index: 25;
+            font-family: monospace;
+            border: 1px solid #aa8a60;
+        }
+
+        /* Splash screen style */
+        .splash {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #1a1e1f;
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Courier New', monospace;
+            transition: opacity 1s ease;
+            color: #c4bcac;
+        }
+
+        .splash-content {
+            text-align: center;
+            transform: translateY(-5%);
+        }
+
+        .made-with {
+            font-size: 1.2rem;
+            letter-spacing: 6px;
+            font-weight: 300;
+            color: #8faa8a;
+            margin-bottom: 20px;
+        }
+
+        .heart-icon {
+            font-size: 3rem;
+            color: #6a8e6a;
+            margin: 15px 0;
+        }
+
+        .studio-name {
+            font-size: 2.1rem;
+            font-weight: 800;
+            letter-spacing: 4px;
+            color: #ddd2bf;
+            margin-top: 20px;
+            text-shadow: 0 0 6px #2a3a2a;
+        }
+
+        .version-tag {
+            position: absolute;
+            bottom: 18px;
+            right: 22px;
+            font-size: 0.65rem;
+            color: #6a6e64;
+            letter-spacing: 1px;
+        }
+
+        .fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        button {
+            pointer-events: auto;
+            cursor: pointer;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div class="game-container" id="gameContainer">
+    <canvas id="gameCanvas"></canvas>
+    <div class="ui-panel" id="healthBarContainer">
+        <div id="healthFill"></div>
+    </div>
+    <div class="ui-panel" id="stats">
+        🔦 <span id="batteryVal">100</span>% &nbsp;| 📜 <span id="diaryCount">0</span>/5 &nbsp;| 🧠 <span id="sanity">100</span>%
+    </div>
+    <div class="ui-panel" id="levelText">
+        LEVEL <span id="currentLevel">1</span> / 5
+    </div>
+    <div id="interactMsg" class="interact-message hidden"></div>
+</div>
+
+<script>
+    (function(){
+        // ----------------------------- SPLASH SCREEN ---------------------------------
+        const splashDiv = document.createElement('div');
+        splashDiv.className = 'splash';
+        splashDiv.innerHTML = `
+            <div class="splash-content">
+                <div class="made-with">MADE WITH</div>
+                <div class="heart-icon">◉ CODE ◉</div>
+                <div class="studio-name">NEXUS PLAY</div>
+                <div style="margin-top: 35px; font-size:0.9rem; letter-spacing:2px;">THE GREY CORRIDOR</div>
+            </div>
+            <div class="version-tag">version 1.0 (build 0422)</div>
+        `;
+        document.body.appendChild(splashDiv);
+        
+        setTimeout(() => {
+            splashDiv.classList.add('fade-out');
+            setTimeout(() => {
+                splashDiv.remove();
+                initGame();  // start game after splash
+            }, 1000);
+        }, 2800);
+        // ----------------------------------------------------------------------------
+        
+        // ----------------------------- GAME CORE -------------------------------------
+        let gameRunning = true;
+        let canvas = document.getElementById('gameCanvas');
+        let ctx = canvas.getContext('2d');
+        
+        // Game state
+        let health = 80;
+        let sanity = 100;
+        let battery = 100;
+        let flashlightOn = true;
+        let diaryCollected = 0;
+        let currentLevelIdx = 1;      // 1..5
+        let diaryPositions = [];        // per level
+        let enemies = [];
+        let ambientAudio = null;
+        let audioCtx = null;
+        let isAudioAllowed = false;
+        let gameInitialized = false;
+        let showInteractMsg = false;
+        let interactMsgText = "";
+        let interactTimer = null;
+        
+        // DLC unlock status (levels 6-10 not in base, but we store flag)
+        let dlcUnlocked = localStorage.getItem('grey_dlc_unlocked') === 'true';
+        
+        // save/load system
+        function saveGame() {
+            const save = {
+                health, sanity, battery, diaryCollected, currentLevelIdx, flashlightOn,
+                dlcUnlocked
+            };
+            localStorage.setItem('grey_corridor_save', JSON.stringify(save));
+        }
+        
+        function loadGame() {
+            const raw = localStorage.getItem('grey_corridor_save');
+            if(!raw) return false;
+            try {
+                const data = JSON.parse(raw);
+                health = data.health ?? 80;
+                sanity = data.sanity ?? 100;
+                battery = data.battery ?? 100;
+                diaryCollected = data.diaryCollected ?? 0;
+                currentLevelIdx = data.currentLevelIdx ?? 1;
+                flashlightOn = data.flashlightOn ?? true;
+                dlcUnlocked = data.dlcUnlocked ?? false;
+                if(dlcUnlocked) localStorage.setItem('grey_dlc_unlocked','true');
+                updateUI();
+                return true;
+            } catch(e) { return false; }
+        }
+        
+        function updateUI() {
+            document.getElementById('healthFill').style.width = Math.max(0,Math.min(100,health)) + '%';
+            document.getElementById('batteryVal').innerText = Math.floor(battery);
+            document.getElementById('diaryCount').innerText = diaryCollected;
+            document.getElementById('sanity').innerText = Math.floor(sanity);
+            document.getElementById('currentLevel').innerText = currentLevelIdx;
+        }
+        
+        // ----- LEVEL DATA (realistic asylum/hospital)
+        const levelNames = ["ADMISSION WARD", "MORGUE CORRIDOR", "LOWER BASEMENT", "FORGOTTEN CHAPEL", "THE EXIT"];
+        function getLevelConfig(level){
+            let diaryPos = [];
+            const count = Math.min(5 - diaryCollected, 2 + Math.floor(Math.random()*2));
+            for(let i=0;i<count;i++){
+                diaryPos.push({x: 150 + Math.random() * (canvas.width-300), y: 80 + Math.random() * (canvas.height-160), collected:false});
+            }
+            return { diaryPositions: diaryPos, enemyCount: 2 + Math.floor(level/1.5) };
+        }
+        
+        let levelDiaries = [];
+        let enemiesList = [];
+        let player = { x: 0, y: 0 };
+        let mouseX = 400, mouseY = 300;
+        let attackCooldown = 0;
+        let frame = 0;
+        let gameLoopId = null;
+        
+        // helper: spawn enemies for current level
+        function spawnEnemiesForLevel(count){
+            const newEnemies = [];
+            for(let i=0;i<count;i++){
+                let side = Math.floor(Math.random()*4);
+                let x,y;
+                if(side===0){ x = Math.random() * canvas.width; y = -60; }
+                else if(side===1){ x = canvas.width+60; y = Math.random() * canvas.height; }
+                else if(side===2){ x = Math.random() * canvas.width; y = canvas.height+60; }
+                else { x = -60; y = Math.random() * canvas.height; }
+                newEnemies.push({
+                    x, y, size: 42,
+                    hp: 3,
+                    speed: 0.55 + Math.random() * 0.4,
+                    type: 'shadow'
+                });
+            }
+            return newEnemies;
+        }
+        
+        function resetLevel(){
+            const config = getLevelConfig(currentLevelIdx);
+            levelDiaries = config.diaryPositions.map(d => ({...d, collected:false}));
+            enemiesList = spawnEnemiesForLevel(config.enemyCount);
+            // place player safe zone center
+            player.x = canvas.width/2;
+            player.y = canvas.height/2;
+            // adjust diary unreached
+            updateUI();
+            showMessage(`📍 ${levelNames[currentLevelIdx-1]}`, 1500);
+        }
+        
+        function nextLevel(){
+            if(currentLevelIdx < 5){
+                currentLevelIdx++;
+                diaryCollected = 0;
+                health = Math.min(100, health+15);
+                sanity = Math.min(100, sanity+20);
+                battery = Math.min(100, battery+40);
+                flashlightOn = true;
+                saveGame();
+                resetLevel();
+                updateUI();
+                showMessage(`⬆️ ENTER LEVEL ${currentLevelIdx}: ${levelNames[currentLevelIdx-1]}`, 2000);
+            } else {
+                // game beaten
+                gameRunning = false;
+                showEnding('ESCAPE');
+            }
+        }
+        
+        function attackAtMouse(){
+            if(!gameRunning) return;
+            let hit = false;
+            for(let i=0;i<enemiesList.length;i++){
+                const e = enemiesList[i];
+                const dx = mouseX - e.x;
+                const dy = mouseY - e.y;
+                const dist = Math.hypot(dx,dy);
+                if(dist < e.size){
+                    e.hp -= 1;
+                    hit = true;
+                    playSfx('hit');
+                    if(e.hp <= 0){
+                        enemiesList.splice(i,1);
+                        i--;
+                        sanity = Math.min(100, sanity+3);
+                        updateUI();
+                    }
+                    break;
+                }
+            }
+            if(hit){
+                ctx.save();
+                ctx.globalAlpha=0.25;
+                ctx.fillStyle='#ffffff';
+                ctx.fillRect(0,0,canvas.width,canvas.height);
+                ctx.restore();
+            }
+        }
+        
+        function takeDamage(amt){
+            if(!gameRunning) return;
+            health -= amt;
+            sanity -= amt*0.6;
+            if(sanity<0) sanity=0;
+            updateUI();
+            playSfx('hurt');
+            // jumpscare flash
+            const flashDiv = document.createElement('div');
+            flashDiv.style.position='fixed';flashDiv.style.top=0;flashDiv.style.left=0;flashDiv.style.width='100%';flashDiv.style.height='100%';
+            flashDiv.style.backgroundColor='rgba(100,20,20,0.7)';flashDiv.style.pointerEvents='none';flashDiv.style.zIndex=150;
+            document.body.appendChild(flashDiv);
+            setTimeout(()=>flashDiv.remove(),120);
+            if(health <= 0){
+                gameRunning = false;
+                alert("❌ YOU BECAME ONE OF THE FORGOTTEN...\nGame Over. Refresh to restart.");
+                location.reload();
+            }
+        }
+        
+        function collectDiary(index){
+            if(!levelDiaries[index] || levelDiaries[index].collected) return;
+            levelDiaries[index].collected = true;
+            diaryCollected++;
+            updateUI();
+            playSfx('diary');
+            showMessage("📖 Diary fragment found. +Sanity", 1200);
+            sanity = Math.min(100, sanity+12);
+            if(diaryCollected >= 5){
+                showMessage("🚪 All memories restored! Find the EXIT door!", 2000);
+                // spawn exit marker
+                if(!window.exitSpawned){
+                    window.exitSpawned = true;
+                    window.exitDoor = { x: canvas.width-120, y: canvas.height-90, active: true };
+                }
+            }
+            saveGame();
+        }
+        
+        function showMessage(msg, duration){
+            const msgDiv = document.getElementById('interactMsg');
+            msgDiv.innerText = msg;
+            msgDiv.classList.remove('hidden');
+            if(interactTimer) clearTimeout(interactTimer);
+            interactTimer = setTimeout(()=>{
+                msgDiv.classList.add('hidden');
+            }, duration);
+        }
+        
+        function checkExitInteraction(){
+            if(window.exitDoor && window.exitDoor.active && diaryCollected>=5){
+                const dx = mouseX - window.exitDoor.x;
+                const dy = mouseY - window.exitDoor.y;
+                if(Math.hypot(dx,dy) < 45){
+                    showMessage("🔓 PRESS [E] TO ESCAPE", 500);
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        // Sound generation (Web Audio - realistic/horror)
+        function initAudio(){
+            if(audioCtx) return;
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            ambientAudio = setInterval(()=>{
+                if(!gameRunning || !audioCtx || !isAudioAllowed) return;
+                const now = audioCtx.currentTime;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.type = 'sine';
+                const baseFreq = 65 + (sanity<30 ? 15 : 0) + Math.sin(Date.now()*0.001)*2;
+                osc.frequency.value = baseFreq;
+                gain.gain.value = 0.07;
+                osc.start();
+                gain.gain.exponentialRampToValueAtTime(0.0001, now+2.5);
+                osc.stop(now+2.5);
+            }, 3800);
+        }
+        
+        function playSfx(type){
+            if(!audioCtx || !isAudioAllowed) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            if(type === 'hit'){
+                osc.frequency.value = 180;
+                gain.gain.value = 0.1;
+                gain.gain.exponentialRampToValueAtTime(0.0001, 0.3);
+                osc.start();
+                osc.stop(0.3);
+            } else if(type === 'hurt'){
+                osc.frequency.value = 90;
+                gain.gain.value = 0.2;
+                gain.gain.exponentialRampToValueAtTime(0.0001, 0.7);
+                osc.start();
+                osc.stop(0.7);
+                // additional noise
+                const noise = audioCtx.createBufferSource();
+                const buffer = audioCtx.createBuffer(1, 4000, audioCtx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for(let i=0;i<4000;i++) data[i] = Math.random()*0.2;
+                noise.buffer = buffer;
+                const noiseGain = audioCtx.createGain();
+                noise.connect(noiseGain);
+                noiseGain.connect(audioCtx.destination);
+                noiseGain.gain.value = 0.08;
+                noise.start();
+                noise.stop(0.4);
+            } else if(type === 'diary'){
+                osc.frequency.value = 440;
+                gain.gain.value = 0.06;
+                gain.gain.exponentialRampToValueAtTime(0.0001, 0.6);
+                osc.start();
+                osc.stop(0.6);
+            }
+        }
+        
+        function drawRealistic(){
+            if(!ctx) return;
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            // grunge background
+            const grad = ctx.createLinearGradient(0,0,canvas.width,canvas.height);
+            grad.addColorStop(0,'#14181c');
+            grad.addColorStop(1,'#0b0e10');
+            ctx.fillStyle=grad;
+            ctx.fillRect(0,0,canvas.width,canvas.height);
+            
+            // draw walls / grid lines (asylum tiles)
+            ctx.strokeStyle = '#2a3228';
+            ctx.lineWidth = 1;
+            for(let i=0;i<canvas.width;i+=80){
+                ctx.beginPath();
+                ctx.moveTo(i,0);
+                ctx.lineTo(i,canvas.height);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(0,i%canvas.height);
+                ctx.lineTo(canvas.width,i%canvas.height);
+                ctx.stroke();
+            }
+            
+            // draw diary pages
+            for(let i=0;i<levelDiaries.length;i++){
+                if(!levelDiaries[i].collected){
+                    ctx.fillStyle = '#dac28c';
+                    ctx.shadowBlur=8;
+                    ctx.font = "bold 26px monospace";
+                    ctx.fillText("📜", levelDiaries[i].x-10, levelDiaries[i].y-8);
+                    ctx.fillStyle = "#ad9e70";
+                    ctx.font = "12px monospace";
+                    ctx.fillText("old note", levelDiaries[i].x-5, levelDiaries[i].y+8);
+                }
+            }
+            
+            // draw exit door
+            if(window.exitDoor && window.exitDoor.active && diaryCollected>=5){
+                ctx.fillStyle = '#5e3e2e';
+                ctx.fillRect(window.exitDoor.x-25, window.exitDoor.y-40, 50, 80);
+                ctx.fillStyle = '#b97f5a';
+                ctx.fillRect(window.exitDoor.x-10, window.exitDoor.y-20, 20, 40);
+                ctx.fillStyle = "#ffcc77";
+                ctx.font = "bold 20px monospace";
+                ctx.fillText("🚪", window.exitDoor.x-12, window.exitDoor.y-10);
+            }
+            
+            // draw enemies (shadow beings)
+            for(let e of enemiesList){
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = '#a22';
+                ctx.fillStyle = '#201a18';
+                ctx.beginPath();
+                ctx.ellipse(e.x, e.y, e.size/1.6, e.size/1.2, 0, 0, Math.PI*2);
+                ctx.fill();
+                ctx.fillStyle = '#632a2a';
+                ctx.beginPath();
+                ctx.arc(e.x-12, e.y-6, 6, 0, Math.PI*2);
+                ctx.arc(e.x+12, e.y-6, 6, 0, Math.PI*2);
+                ctx.fill();
+                ctx.fillStyle = '#aa4433';
+                ctx.beginPath();
+                ctx.arc(e.x-12+Math.sin(Date.now()*0.01)*1.2, e.y-8, 2,0,Math.PI*2);
+                ctx.arc(e.x+12+Math.sin(Date.now()*0.01)*1.2, e.y-8, 2,0,Math.PI*2);
+                ctx.fill();
+            }
+            
+            // flashlight cone
+            if(flashlightOn && battery>0){
+                ctx.save();
+                ctx.globalCompositeOperation = 'lighter';
+                const angle = Math.atan2(mouseY - player.y, mouseX - player.x);
+                const coneLen = 280;
+                ctx.beginPath();
+                ctx.moveTo(player.x, player.y);
+                ctx.arc(player.x, player.y, coneLen, angle-0.9, angle+0.9);
+                ctx.fillStyle = 'rgba(210,200,130,0.22)';
+                ctx.fill();
+                ctx.restore();
+            }
+            
+            // crosshair
+            ctx.strokeStyle = '#f2d98b';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(mouseX-14,mouseY);
+            ctx.lineTo(mouseX-5,mouseY);
+            ctx.moveTo(mouseX+5,mouseY);
+            ctx.lineTo(mouseX+14,mouseY);
+            ctx.moveTo(mouseX,mouseY-14);
+            ctx.lineTo(mouseX,mouseY-5);
+            ctx.moveTo(mouseX,mouseY+5);
+            ctx.lineTo(mouseX,mouseY+14);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(mouseX,mouseY,10,0,Math.PI*2);
+            ctx.stroke();
+            
+            // sanity vignette
+            if(sanity<50){
+                const vig = ctx.createRadialGradient(canvas.width/2,canvas.height/2,50,canvas.width/2,canvas.height/2,canvas.width/1.6);
+                vig.addColorStop(0,'rgba(0,0,0,0)');
+                vig.addColorStop(1,'rgba(0,0,0,0.7)');
+                ctx.fillStyle=vig;
+                ctx.fillRect(0,0,canvas.width,canvas.height);
+            }
+            ctx.shadowBlur=0;
+        }
+        
+        function updateGame(){
+            if(!gameRunning) return;
+            // battery
+            if(flashlightOn && battery>0){
+                battery -= 0.22;
+                if(battery<=0){ battery=0; flashlightOn=false; }
+                updateUI();
+            } else if(!flashlightOn && battery<100){
+                battery += 0.08;
+                updateUI();
+            }
+            // enemy movement and collision
+            for(let i=0;i<enemiesList.length;i++){
+                const e = enemiesList[i];
+                const dx = player.x - e.x, dy = player.y - e.y;
+                const dist = Math.hypot(dx,dy);
+                if(dist>0.1){
+                    e.x += (dx/dist)*e.speed;
+                    e.y += (dy/dist)*e.speed;
+                }
+                const distToMouse = Math.hypot(mouseX - e.x, mouseY - e.y);
+                if(distToMouse < e.size+8){
+                    takeDamage(12);
+                    enemiesList.splice(i,1);
+                    i--;
+                }
+            }
+            // diary collect interaction
+            for(let i=0;i<levelDiaries.length;i++){
+                if(!levelDiaries[i].collected){
+                    const dx = mouseX - levelDiaries[i].x;
+                    const dy = mouseY - levelDiaries[i].y;
+                    if(Math.hypot(dx,dy)<35){
+                        showMessage("📖 [CLICK] to read diary", 400);
+                        // click handler integrated
+                    }
+                }
+            }
+            if(attackCooldown>0) attackCooldown--;
+            // auto enemy spawn random for tension
+            if(frame%90===0 && enemiesList.length<5 && Math.random()<0.45){
+                let side = Math.floor(Math.random()*4);
+                let x,y;
+                if(side===0){ x = Math.random()*canvas.width; y = -50; }
+                else if(side===1){ x=canvas.width+50; y=Math.random()*canvas.height; }
+                else if(side===2){ x=Math.random()*canvas.width; y=canvas.height+50; }
+                else { x=-50; y=Math.random()*canvas.height; }
+                enemiesList.push({x,y,size:40,hp:3,speed:0.6+Math.random()*0.3,type:'shadow'});
+            }
+            frame++;
+        }
+        
+        function animate(){
+            if(!gameRunning) return;
+            updateGame();
+            drawRealistic();
+            requestAnimationFrame(animate);
+        }
+        
+        // Event listeners
+        function resizeCanvas(){
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            player.x = canvas.width/2;
+            player.y = canvas.height/2;
+            if(window.exitDoor){
+                window.exitDoor.x = canvas.width-120;
+                window.exitDoor.y = canvas.height-90;
+            }
+            resetLevel();
+        }
+        
+        function initGame(){
+            canvas = document.getElementById('gameCanvas');
+            ctx = canvas.getContext('2d');
+            resizeCanvas();
+            window.addEventListener('resize',()=>{
+                resizeCanvas();
+                resetLevel();
+            });
+            canvas.addEventListener('mousemove',(e)=>{
+                const rect = canvas.getBoundingClientRect();
+                mouseX = e.clientX - rect.left;
+                mouseY = e.clientY - rect.top;
+            });
+            canvas.addEventListener('click',(e)=>{
+                if(!gameRunning) return;
+                // diary collection
+                for(let i=0;i<levelDiaries.length;i++){
+                    if(!levelDiaries[i].collected){
+                        const dx = mouseX - levelDiaries[i].x;
+                        const dy = mouseY - levelDiaries[i].y;
+                        if(Math.hypot(dx,dy)<40){
+                            collectDiary(i);
+                            break;
+                        }
+                    }
+                }
+                // exit door click
+                if(window.exitDoor && window.exitDoor.active && diaryCollected>=5){
+                    const dx = mouseX - window.exitDoor.x;
+                    const dy = mouseY - window.exitDoor.y;
+                    if(Math.hypot(dx,dy)<55){
+                        nextLevel();
+                        return;
+                    }
+                }
+                attackAtMouse();
+            });
+            window.addEventListener('keydown',(e)=>{
+                if(e.code === 'Space'){
+                    e.preventDefault();
+                    flashlightOn = !flashlightOn;
+                    playSfx('hit');
+                    showMessage(flashlightOn ? "🔦 FLASHLIGHT ON" : "💡 FLASHLIGHT OFF", 500);
+                }
+                if(e.code === 'KeyE' && window.exitDoor && window.exitDoor.active && diaryCollected>=5){
+                    const dx = mouseX - window.exitDoor.x;
+                    const dy = mouseY - window.exitDoor.y;
+                    if(Math.hypot(dx,dy)<55) nextLevel();
+                }
+            });
+            // audio unlock on first click
+            canvas.addEventListener('click',()=>{
+                if(!isAudioAllowed){
+                    isAudioAllowed=true;
+                    initAudio();
+                    if(audioCtx) audioCtx.resume();
+                    playSfx('diary');
+                    showMessage("🎧 AUDIO INITIALIZED | dread approaches", 1500);
+                }
+            },{once:true});
+            
+            loadGame();
+            resetLevel();
+            updateUI();
+            gameRunning=true;
+            animate();
+            setInterval(()=>{ if(gameRunning) saveGame(); }, 15000);
+        }
+        
+        function showEnding(ending){
+            gameRunning=false;
+            const overlay = document.createElement('div');
+            overlay.style.position='fixed';overlay.style.top=0;overlay.style.left=0;overlay.style.width='100%';overlay.style.height='100%';
+            overlay.style.backgroundColor='#0a0c0cee';overlay.style.zIndex=300;overlay.style.display='flex';overlay.style.justifyContent='center';overlay.style.alignItems='center';
+            overlay.style.flexDirection='column';overlay.style.fontFamily='monospace';overlay.style.color='#bba98a';
+            overlay.innerHTML = `<h2>✦ ${ending === 'ESCAPE' ? 'ESCAPE ENDING' : 'THE FORGOTTEN'} ✦</h2>
+            <p style="margin:20px">${ending === 'ESCAPE' ? 'You escaped the Grey Corridor. But some memories stay buried.' : 'You faded into the walls... forever.'}</p>
+            <p style="font-size:12px">- NEXUS PLAY -</p>
+            <button id="restartBtn" style="margin-top:30px;background:#2a2e2a;border:1px solid #6a7a5a;color:#eee;padding:8px 24px;">RESTART GAME</button>`;
+            document.body.appendChild(overlay);
+            document.getElementById('restartBtn').onclick = ()=>location.reload();
+        }
+    })();
+</script>
+</body>
+</html>
