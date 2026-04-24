@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Grey Corridor - Anny's Nightmare</title>
     <style>
         * {
@@ -10,6 +10,7 @@
             padding: 0;
             box-sizing: border-box;
             user-select: none;
+            touch-action: manipulation;
         }
 
         body {
@@ -20,81 +21,94 @@
 
         canvas {
             display: block;
-            cursor: crosshair;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
         }
 
+        /* UI Panels */
         .ui-panel {
             position: fixed;
-            z-index: 20;
             background: rgba(0,0,0,0.85);
+            color: white;
             padding: 8px 16px;
-            border-left: 3px solid #8b0000;
-            color: #eeddcc;
             font-family: monospace;
-            font-size: 14px;
+            z-index: 20;
             pointer-events: none;
             backdrop-filter: blur(4px);
-            border-radius: 4px;
+            border-radius: 8px;
+            font-size: 14px;
         }
 
-        #healthBar, #enemyHealthBar {
-            bottom: 20px;
-            left: 20px;
-            width: 220px;
-        }
+        #healthBar { bottom: 20px; left: 20px; }
+        #stats { top: 20px; right: 20px; }
+        #levelInfo { top: 20px; left: 20px; }
 
-        #enemyHealthBar {
-            bottom: 70px;
-            left: 20px;
-            width: 220px;
-            background: #2a1a1a;
-        }
-
-        #healthFill, #enemyHealthFill {
-            height: 10px;
-            background: #c0392b;
-            width: 100%;
-            transition: width 0.2s;
-        }
-
-        #enemyHealthFill {
-            background: #aa3333;
-        }
-
-        #controlsHint {
-            bottom: 20px;
-            right: 20px;
-            text-align: right;
-            background: rgba(0,0,0,0.6);
-            font-size: 11px;
-        }
-
-        #stats {
-            top: 20px;
-            right: 20px;
-            text-align: right;
-        }
-
-        #levelInfo {
-            top: 20px;
-            left: 20px;
-            text-align: left;
-        }
-
-        .store-btn {
+        /* Mobile Touch Controls */
+        .touch-controls {
             position: fixed;
             bottom: 20px;
-            left: 100px;
-            width: 50px;
-            height: 50px;
-            background: #2a2a1acc;
+            right: 20px;
+            z-index: 30;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            pointer-events: none;
+        }
+
+        .movement-row {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .ctrl-btn {
+            width: 70px;
+            height: 70px;
+            background: rgba(20,20,30,0.9);
             backdrop-filter: blur(8px);
             border: 2px solid #ffaa44;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
+            font-size: 32px;
+            font-weight: bold;
+            color: #ffdd99;
+            pointer-events: auto;
+            cursor: pointer;
+            touch-action: manipulation;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
+        .ctrl-btn:active {
+            background: #aa5a2a;
+            transform: scale(0.95);
+        }
+
+        .attack-btn {
+            background: #8a2a1a;
+            border-color: #ff6644;
+            font-size: 36px;
+        }
+
+        .store-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            width: 60px;
+            height: 60px;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(8px);
+            border: 2px solid #ffaa44;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
             cursor: pointer;
             z-index: 30;
             pointer-events: auto;
@@ -102,14 +116,14 @@
 
         .message {
             position: fixed;
-            bottom: 30%;
+            bottom: 35%;
             left: 50%;
             transform: translateX(-50%);
             background: #000000cc;
             backdrop-filter: blur(10px);
             color: #ffcc88;
-            padding: 8px 20px;
-            border-radius: 30px;
+            padding: 10px 20px;
+            border-radius: 40px;
             font-size: 14px;
             z-index: 30;
             pointer-events: none;
@@ -117,97 +131,7 @@
             display: none;
         }
 
-        .splash {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #121614;
-            z-index: 300;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            font-family: 'Courier New', monospace;
-            transition: opacity 1s ease;
-            color: #bfb89a;
-        }
-
-        .splash-content {
-            text-align: center;
-        }
-
-        .made-with {
-            font-size: 1.1rem;
-            letter-spacing: 5px;
-            color: #7a9a6a;
-        }
-
-        .studio-name {
-            font-size: 2rem;
-            font-weight: 800;
-            letter-spacing: 4px;
-            margin-top: 20px;
-        }
-
-        .version-tag {
-            position: absolute;
-            bottom: 18px;
-            right: 22px;
-            font-size: 0.65rem;
-            color: #5a5e54;
-        }
-
-        .fade-out {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .story-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.96);
-            z-index: 200;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            backdrop-filter: blur(5px);
-            animation: fadeOut 0.5s ease-in-out 5s forwards;
-        }
-
-        @keyframes fadeOut {
-            0% { opacity: 1; visibility: visible; }
-            99% { opacity: 0; visibility: visible; }
-            100% { opacity: 0; visibility: hidden; display: none; }
-        }
-
-        .story-box {
-            background: #1a1410;
-            border: 3px solid #8a3a1a;
-            padding: 40px 50px;
-            max-width: 600px;
-            text-align: center;
-            color: #d4c4aa;
-            border-radius: 8px;
-        }
-
-        .story-box h1 {
-            color: #cc5533;
-            margin-bottom: 25px;
-            letter-spacing: 3px;
-        }
-
-        .story-box p {
-            font-size: 18px;
-            line-height: 1.6;
-            margin: 20px 0;
-            text-align: left;
-        }
-
+        /* Store Panel */
         .store-panel {
             position: fixed;
             top: 0;
@@ -224,7 +148,7 @@
 
         .store-header {
             background: #1a1410;
-            padding: 15px 20px;
+            padding: 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -237,7 +161,7 @@
 
         .store-header h1 {
             color: #ffaa66;
-            font-size: 22px;
+            font-size: 20px;
         }
 
         .coins {
@@ -246,7 +170,6 @@
             border-radius: 40px;
             color: #ffcc44;
             font-weight: bold;
-            font-size: 18px;
         }
 
         .close-store {
@@ -256,11 +179,36 @@
             padding: 6px 20px;
             border-radius: 40px;
             cursor: pointer;
+            font-family: monospace;
+        }
+
+        .category-tabs {
+            display: flex;
+            gap: 10px;
+            padding: 12px;
+            background: #1a141080;
+            flex-wrap: wrap;
+        }
+
+        .cat-btn {
+            background: #2a221a;
+            border: 1px solid #aa6a3a;
+            padding: 6px 15px;
+            border-radius: 30px;
+            color: #eeddcc;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .cat-btn.active {
+            background: #aa5a2a;
+            border-color: #ffaa66;
+            color: white;
         }
 
         .products-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
             gap: 15px;
             padding: 20px;
         }
@@ -271,7 +219,6 @@
             border-radius: 16px;
             padding: 12px;
             text-align: center;
-            cursor: pointer;
             transition: 0.2s;
         }
 
@@ -287,9 +234,10 @@
         }
 
         .product-price {
-            font-size: 18px;
+            font-size: 16px;
             color: #ffcc44;
             font-weight: bold;
+            margin: 5px 0;
         }
 
         .product-quality {
@@ -298,88 +246,24 @@
             margin: 5px 0;
         }
 
-        .try-btn {
+        .try-btn, .buy-btn, .equip-btn {
             background: #2a6a8a;
             border: none;
             color: white;
             padding: 6px 15px;
             border-radius: 30px;
             cursor: pointer;
-            margin-top: 8px;
-            margin-right: 5px;
+            margin: 5px 3px;
+            font-size: 12px;
         }
 
-        .buy-btn, .equip-btn {
-            background: #8a2a1a;
-            border: none;
-            color: white;
-            padding: 6px 15px;
-            border-radius: 30px;
-            cursor: pointer;
-            margin-top: 8px;
-        }
+        .buy-btn { background: #8a2a1a; }
+        .equip-btn { background: #2a6a3a; }
 
-        .equip-btn {
-            background: #2a6a3a;
-        }
-
-        .level-upgrade {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #2a2a1acc;
-            backdrop-filter: blur(8px);
-            border: 2px solid #ffaa44;
-            border-radius: 40px;
-            padding: 10px 20px;
-            color: #ffdd99;
-            cursor: pointer;
-            z-index: 30;
-            display: none;
-        }
-
-        .coming-soon {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: #000000ee;
-            backdrop-filter: blur(15px);
-            border: 3px solid #ffaa44;
-            border-radius: 30px;
-            padding: 30px 50px;
-            text-align: center;
-            z-index: 400;
-            display: none;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .coming-soon h1 {
-            color: #ffaa66;
-            font-size: 32px;
-        }
-
-        .coming-soon p {
-            color: #eeddcc;
-            font-size: 18px;
-        }
-
-        .coming-soon button {
-            background: #8a2a1a;
-            border: none;
-            color: white;
-            padding: 10px 30px;
-            border-radius: 40px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-
-        @media (max-width: 700px) {
-            .products-grid {
-                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            }
+        @media (max-width: 600px) {
+            .ctrl-btn { width: 60px; height: 60px; font-size: 28px; }
+            .store-btn { width: 50px; height: 50px; font-size: 24px; }
+            .products-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
         }
     </style>
 </head>
@@ -387,31 +271,25 @@
     <canvas id="gameCanvas"></canvas>
 
     <div class="ui-panel" id="levelInfo">
-        🏚️ LEVEL <span id="currentLevel">1</span>/16<br>
-        💰 <span id="coins">500</span> coins<br>
+        💰 <span id="coinsAmount">500</span> coins<br>
         🗡️ <span id="currentWeaponName">Rusty Axe</span>
     </div>
-    <div class="ui-panel" id="healthBar">
-        ❤️ ANNY <div id="healthFill"></div>
-    </div>
-    <div class="ui-panel" id="enemyHealthBar" style="display:none">
-        👮 OFFICER <div id="enemyHealthFill"></div>
-    </div>
-    <div class="ui-panel" id="stats">
-        💀 <span id="kills">0</span> kills<br>
-        ⚡ <span id="weaponStat">DMG: 8</span>
-    </div>
-    <div class="ui-panel" id="controlsHint">
-        🎮 WASD = Move | Shift = Run | Space = Jump | Click = Attack
-    </div>
+    <div class="ui-panel" id="healthBar">❤️ ANNY <span id="healthVal">100</span>%</div>
+    <div class="ui-panel" id="stats">💀 <span id="kills">0</span> kills</div>
+
     <div class="store-btn" id="storeBtn">🛒</div>
-    <div class="level-upgrade" id="levelUpgradeBtn">🔓 BUY 8 MORE LEVELS ($7)</div>
-    <div id="message" class="message"></div>
-    <div class="coming-soon" id="comingSoonPanel">
-        <h1>🚧 COMING SOON 🚧</h1>
-        <p>More levels, more enemies, more outfits coming in the next update!</p>
-        <button id="closeComingSoonBtn">Continue Playing</button>
+
+    <div class="touch-controls">
+        <div class="movement-row"><div class="ctrl-btn" id="btnUp">⬆️</div></div>
+        <div class="movement-row">
+            <div class="ctrl-btn" id="btnLeft">⬅️</div>
+            <div class="ctrl-btn" id="btnDown">⬇️</div>
+            <div class="ctrl-btn" id="btnRight">➡️</div>
+        </div>
+        <div class="movement-row"><div class="ctrl-btn attack-btn" id="btnAttack">⚔️</div></div>
     </div>
+
+    <div id="message" class="message"></div>
 
     <!-- Store Panel -->
     <div class="store-panel" id="storePanel">
@@ -420,442 +298,185 @@
             <div class="coins">💰 <span id="storeCoins">500</span></div>
             <button class="close-store" id="closeStoreBtn">✖ CLOSE</button>
         </div>
+        <div class="category-tabs" id="categoryTabs"></div>
         <div class="products-grid" id="productsGrid"></div>
     </div>
 
     <script>
         // ------------------------- GAME STATE -------------------------
-        let gameRunning = true;
-        let currentLevel = 1;
-        let maxFreeLevel = 8;
-        let maxLevel = 8;
         let coins = 500;
         let kills = 0;
-        let unlockedMoreLevels = false;
+        let currentLevel = 1;
+        let gameRunning = true;
         
-        // Player (ANNY)
+        // Player
         let player = {
-            x: 400, y: 300,
-            width: 55, height: 85,
-            health: 100,
-            maxHealth: 100,
+            x: 400, y: 300, width: 55, height: 85,
+            health: 100, maxHealth: 100,
             facing: 'right',
-            isRunning: false,
-            isJumping: false,
-            velocityY: 0,
-            velocityX: 0,
-            onGround: true,
             currentOutfit: "outfit_default",
             currentWeapon: "weapon_axe",
             tryOnOutfit: null
         };
         
-        // WEAPONS
+        // Weapons
         const weapons = [
-            { id: "weapon_axe", name: "Rusty Axe", price: 0, damage: 8, speed: 1.0, range: 70, quality: "Balanced", owned: true, equipped: true },
-            { id: "weapon_knife", name: "Combat Knife", price: 700, damage: 6, speed: 1.5, range: 50, quality: "Fast attack speed", owned: false, equipped: false },
-            { id: "weapon_baton", name: "Police Baton", price: 900, damage: 7, speed: 1.3, range: 60, quality: "Good reach", owned: false, equipped: false },
-            { id: "weapon_hammer", name: "Sledgehammer", price: 1200, damage: 15, speed: 0.6, range: 75, quality: "High damage, slow", owned: false, equipped: false },
-            { id: "weapon_sword", name: "Officer Sword", price: 1500, damage: 10, speed: 1.2, range: 80, quality: "Balanced+", owned: false, equipped: false },
-            { id: "weapon_katana", name: "Katana", price: 2000, damage: 12, speed: 1.4, range: 75, quality: "Sharp & fast", owned: false, equipped: false },
-            { id: "weapon_chainsaw", name: "Chainsaw", price: 3000, damage: 20, speed: 0.8, range: 65, quality: "Brutal power", owned: false, equipped: false },
-            { id: "weapon_plasma", name: "Plasma Blade", price: 5000, damage: 18, speed: 1.6, range: 85, quality: "Legendary speed", owned: false, equipped: false }
+            { id: "weapon_axe", name: "Rusty Axe", price: 0, damage: 8, speed: 1.0, quality: "Balanced", owned: true, equipped: true },
+            { id: "weapon_knife", name: "Combat Knife", price: 700, damage: 6, speed: 1.5, quality: "Fast +50% speed", owned: false, equipped: false },
+            { id: "weapon_hammer", name: "Sledgehammer", price: 1200, damage: 15, speed: 0.6, quality: "High damage -40% speed", owned: false, equipped: false },
+            { id: "weapon_sword", name: "Officer Sword", price: 1500, damage: 10, speed: 1.2, quality: "Balanced+", owned: false, equipped: false },
+            { id: "weapon_katana", name: "Katana", price: 2000, damage: 12, speed: 1.4, quality: "Sharp & fast +20% dodge", owned: false, equipped: false },
+            { id: "weapon_chainsaw", name: "Chainsaw", price: 3000, damage: 20, speed: 0.8, quality: "Brutal power", owned: false, equipped: false },
+            { id: "weapon_plasma", name: "Plasma Blade", price: 5000, damage: 18, speed: 1.6, quality: "Legendary speed", owned: false, equipped: false }
         ];
         
-        // Enemy weapons
-        const enemyWeapons = [
-            { name: "Rusty Knife", damage: 8, color: "#6a6a6a" },
-            { name: "Lead Pipe", damage: 10, color: "#8a8a6a" },
-            { name: "Officer Baton", damage: 12, color: "#5a5a3a" },
-            { name: "Combat Knife", damage: 14, color: "#aaaaaa" },
-            { name: "Hammer", damage: 16, color: "#9a8a6a" },
-            { name: "Chainsaw", damage: 20, color: "#cc5533" }
-        ];
-        
-        // OUTFITS
+        // Outfits (1000-6000 coins)
         const outfits = [
-            { id: "outfit_default", name: "Default Outfit", price: 0, owned: true, equipped: true, showsSkin: false },
-            { id: "outfit_jeans_tshirt", name: "Jeans + TShirt", price: 1000, owned: false, equipped: false, showsSkin: false },
-            { id: "outfit_yellow_raincoat", name: "Yellow Raincoat", price: 1000, owned: false, equipped: false, showsSkin: false },
-            { id: "outfit_hoodie_trouser", name: "Hoodie + Trouser", price: 1100, owned: false, equipped: false, showsSkin: false },
-            { id: "outfit_tracksuit", name: "Tracksuit", price: 1200, owned: false, equipped: false, showsSkin: false },
-            { id: "outfit_red_bra", name: "Red Bra + Panty", price: 1200, owned: false, equipped: false, showsSkin: true },
-            { id: "outfit_denim_leggings", name: "Denim + Leggings", price: 1300, owned: false, equipped: false, showsSkin: false },
-            { id: "outfit_sweater_pants", name: "Sweater + Pants", price: 1400, owned: false, equipped: false, showsSkin: false },
-            { id: "outfit_cardigan_skirt", name: "Cardigan + Skirt", price: 1500, owned: false, equipped: false, showsSkin: true },
-            { id: "outfit_black_abaya", name: "Black Abaya", price: 1500, owned: false, equipped: false, showsSkin: false },
-            { id: "outfit_navy_abaya", name: "Navy Blue Abaya", price: 1600, owned: false, equipped: false, showsSkin: false },
-            { id: "outfit_winter_coat", name: "Winter Coat", price: 1800, owned: false, equipped: false, showsSkin: false },
-            { id: "outfit_formal_wear", name: "Formal Wear", price: 2000, owned: false, equipped: false, showsSkin: false },
-            { id: "outfit_office_suit", name: "Office Suit", price: 2200, owned: false, equipped: false, showsSkin: false },
-            { id: "outfit_purple_night", name: "Purple Night Wear", price: 2500, owned: false, equipped: false, showsSkin: true },
-            { id: "outfit_black_silk_night", name: "Black Silk Night", price: 3000, owned: false, equipped: false, showsSkin: true },
-            { id: "outfit_premium_1", name: "Midnight Lace", price: 4000, owned: false, equipped: false, showsSkin: true },
-            { id: "outfit_premium_2", name: "Crimson Queen", price: 5000, owned: false, equipped: false, showsSkin: true },
-            { id: "outfit_premium_3", name: "Shadow Empress", price: 6000, owned: false, equipped: false, showsSkin: true }
+            { id: "outfit_default", name: "Default Outfit", price: 0, owned: true, equipped: true, effect: "Starting outfit" },
+            { id: "outfit_jeans_tshirt", name: "Jeans + TShirt", price: 1000, owned: false, equipped: false, effect: "+5% stamina" },
+            { id: "outfit_yellow_raincoat", name: "Yellow Raincoat", price: 1000, owned: false, equipped: false, effect: "+15% rain resistance" },
+            { id: "outfit_hoodie_trouser", name: "Hoodie + Trouser", price: 1100, owned: false, equipped: false, effect: "+10% defense" },
+            { id: "outfit_tracksuit", name: "Tracksuit", price: 1200, owned: false, equipped: false, effect: "+12% speed" },
+            { id: "outfit_red_bra", name: "Red Bra + Panty", price: 1200, owned: false, equipped: false, effect: "+10% charm" },
+            { id: "outfit_denim_leggings", name: "Denim + Leggings", price: 1300, owned: false, equipped: false, effect: "+8% agility" },
+            { id: "outfit_sweater_pants", name: "Sweater + Pants", price: 1400, owned: false, equipped: false, effect: "+15% warmth" },
+            { id: "outfit_cardigan_skirt", name: "Cardigan + Skirt", price: 1500, owned: false, equipped: false, effect: "+10% elegance" },
+            { id: "outfit_black_abaya", name: "Black Abaya", price: 1500, owned: false, equipped: false, effect: "+15% respect" },
+            { id: "outfit_navy_abaya", name: "Navy Blue Abaya", price: 1600, owned: false, equipped: false, effect: "+12% wisdom" },
+            { id: "outfit_winter_coat", name: "Winter Coat", price: 1800, owned: false, equipped: false, effect: "+20% cold resistance" },
+            { id: "outfit_formal_wear", name: "Formal Wear", price: 2000, owned: false, equipped: false, effect: "+20% authority" },
+            { id: "outfit_office_suit", name: "Office Suit", price: 2200, owned: false, equipped: false, effect: "+25% authority" },
+            { id: "outfit_purple_night", name: "Purple Night Wear", price: 2500, owned: false, equipped: false, effect: "+15% comfort" },
+            { id: "outfit_black_silk_night", name: "Black Silk Night", price: 3000, owned: false, equipped: false, effect: "+18% luxury" },
+            { id: "outfit_premium_1", name: "Midnight Lace", price: 4000, owned: false, equipped: false, effect: "+25% allure" },
+            { id: "outfit_premium_2", name: "Crimson Queen", price: 5000, owned: false, equipped: false, effect: "+30% domination" },
+            { id: "outfit_premium_3", name: "Shadow Empress", price: 6000, owned: false, equipped: false, effect: "+40% shadow power" }
         ];
         
+        // Game objects
         let enemies = [];
-        let keys = { w: false, s: false, a: false, d: false, shift: false, space: false };
-        let mouseX = 400, mouseY = 300;
+        let keys = { left: false, right: false, up: false, down: false };
         let attackCooldown = 0;
-        let frameCounter = 0;
-        let groundY = 550;
+        let groundY = 500;
+        let currentCategory = "All";
+        
+        // Image loading
+        let annyImage = new Image();
+        annyImage.src = 'images/outfit_default.png';
+        let imageLoaded = false;
+        annyImage.onload = () => { imageLoaded = true; };
+        
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
         
         function getCurrentWeapon() {
             return weapons.find(w => w.id === player.currentWeapon);
         }
         
         function getDisplayOutfit() {
-            if (player.tryOnOutfit) return player.tryOnOutfit;
-            return player.currentOutfit;
+            return player.tryOnOutfit || player.currentOutfit;
         }
         
-        class Enemy {
-            constructor(x, y, level) {
-                this.x = x;
-                this.y = y;
-                this.width = 50;
-                this.height = 70;
-                this.health = 15 + (level * 4) + Math.floor(Math.random() * 12);
-                this.maxHealth = this.health;
-                this.attackCooldown = 0;
-                const weaponIndex = Math.min(Math.floor(Math.random() * (1 + Math.floor(level/2))), enemyWeapons.length - 1);
-                this.weapon = enemyWeapons[weaponIndex];
-                this.speed = 1.0 + (level * 0.08);
-                this.attackCooldownMax = 35 - Math.floor(level / 2);
-                this.isBoss = false;
-            }
-            
-            update() {
-                const currentWeapon = getCurrentWeapon();
-                const speedBonus = currentWeapon.id === "weapon_katana" ? 0.2 : 0;
-                
-                if (this.x < player.x) this.x += this.speed + speedBonus;
-                if (this.x > player.x) this.x -= this.speed + speedBonus;
-                this.x = Math.min(Math.max(this.x, 30), canvas.width - 30);
-                
-                if (this.attackCooldown > 0) this.attackCooldown--;
-                
-                if (Math.abs(player.x - this.x) < 55 && this.attackCooldown === 0) {
-                    takeDamage(this.weapon.damage);
-                    this.attackCooldown = this.attackCooldownMax;
-                }
-            }
-            
-            draw() {
-                ctx.fillStyle = '#2a3a2a';
-                ctx.beginPath();
-                ctx.ellipse(this.x, this.y + this.height/2, 25, 35, 0, 0, Math.PI*2);
-                ctx.fill();
-                
-                ctx.fillStyle = '#1a2a1a';
-                ctx.fillRect(this.x - 22, this.y + 5, 44, 15);
-                ctx.fillStyle = '#aa3333';
-                ctx.fillRect(this.x - 10, this.y + 3, 20, 8);
-                ctx.fillStyle = '#ffdd44';
-                ctx.font = "12px monospace";
-                ctx.fillText("☭", this.x - 3, this.y + 15);
-                
-                ctx.fillStyle = this.weapon.color;
-                ctx.fillRect(this.x + 20, this.y + 35, 35, 8);
-                if (this.weapon.name === "Chainsaw") {
-                    ctx.fillStyle = "#cc5533";
-                    ctx.fillRect(this.x + 50, this.y + 30, 18, 18);
-                } else {
-                    ctx.fillRect(this.x + 50, this.y + 30, 12, 18);
-                }
-                
-                ctx.fillStyle = `#ff${Math.min(33 + currentLevel * 5, 99)}33`;
-                ctx.beginPath();
-                ctx.arc(this.x - 12, this.y + 25, 6, 0, Math.PI*2);
-                ctx.arc(this.x + 12, this.y + 25, 6, 0, Math.PI*2);
-                ctx.fill();
-                
-                ctx.fillStyle = '#330000';
-                ctx.fillRect(this.x - 30, this.y - 10, 60, 8);
-                ctx.fillStyle = `#${Math.min(255, 100 + currentLevel * 15).toString(16)}0000`;
-                ctx.fillRect(this.x - 30, this.y - 10, 60 * (this.health/this.maxHealth), 8);
-                
-                ctx.fillStyle = "#ffaa66";
-                ctx.font = "10px monospace";
-                ctx.fillText(`Lv.${currentLevel}`, this.x - 15, this.y - 12);
-            }
-            
-            takeDamage(amt) {
-                this.health -= amt;
-                return this.health <= 0;
-            }
-        }
-        
-        function loadLevel() {
-            enemies = [];
-            let enemyCount = 18 + Math.floor(Math.random() * 7); // 18-25 enemies per level (Ninja Arashi style)
-            for (let i = 0; i < enemyCount; i++) {
-                let x = Math.random() * (canvas.width - 150) + 75;
-                let y = groundY - 70;
-                enemies.push(new Enemy(x, y, currentLevel));
-            }
-            document.getElementById('currentLevel').innerText = currentLevel;
-            showMessage(`🔥 LEVEL ${currentLevel} - ${enemies.length} officers! Defeat them all!`, 2500);
-        }
-        
-        function nextLevel() {
-            if (enemies.length === 0) {
-                if (currentLevel < maxLevel) {
-                    currentLevel++;
-                    coins += 500 + (currentLevel * 50);
-                    updateUI();
-                    loadLevel();
-                } else if (currentLevel === maxLevel && maxLevel === 16) {
-                    // Coming Soon after level 16
-                    document.getElementById('comingSoonPanel').style.display = 'flex';
-                    gameRunning = false;
-                } else if (currentLevel === maxLevel && maxLevel < 16 && !unlockedMoreLevels) {
-                    showMessage("🔓 Buy 8 more levels in store! ($7)", 2000);
-                    document.getElementById('levelUpgradeBtn').style.display = 'block';
-                }
-            }
-        }
-        
-        function buyMoreLevels() {
-            if (!unlockedMoreLevels && maxLevel === 8) {
-                unlockedMoreLevels = true;
-                maxLevel = 16;
-                showMessage("✅ 8 more levels unlocked! Continue your journey to level 16!", 2500);
-                document.getElementById('levelUpgradeBtn').style.display = 'none';
-                document.getElementById('levelInfo').innerHTML = `🏚️ LEVEL <span id="currentLevel">${currentLevel}</span>/16<br>💰 <span id="coins">${coins}</span> coins<br>🗡️ <span id="currentWeaponName">${getCurrentWeapon().name}</span>`;
-                if (currentLevel === 8 && enemies.length === 0) {
-                    currentLevel++;
-                    loadLevel();
-                }
-            }
-        }
-        
-        function attack() {
-            if (attackCooldown > 0) return;
-            const weapon = getCurrentWeapon();
-            attackCooldown = Math.floor(18 / weapon.speed);
-            
-            for (let i = 0; i < enemies.length; i++) {
-                const e = enemies[i];
-                const dx = Math.abs(player.x - e.x);
-                const dy = Math.abs((player.y + player.height/2) - (e.y + e.height/2));
-                if (dx < weapon.range && dy < 70) {
-                    if (e.takeDamage(weapon.damage)) {
-                        enemies.splice(i, 1);
-                        kills++;
-                        coins += 50;
-                        updateUI();
-                        showMessage(`💀 Officer defeated! +50 coins`, 800);
-                        nextLevel();
-                    } else {
-                        showMessage(`⚔️ ${weapon.name} hit! (${weapon.damage} dmg)`, 400);
-                    }
-                    break;
-                }
-            }
-            
-            ctx.save();
-            ctx.globalAlpha = 0.4;
-            ctx.fillStyle = '#ffaa66';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.restore();
-        }
-        
-        function takeDamage(amt) {
-            const weapon = getCurrentWeapon();
-            if (weapon.id === "weapon_katana" && Math.random() < 0.2) {
-                showMessage("✨ Katana dodge!", 300);
-                return;
-            }
-            player.health -= amt;
-            updateUI();
-            if (player.health <= 0) {
-                gameRunning = false;
-                alert("💀 ANNY DIED! Refresh to play again.");
-                location.reload();
-            }
-        }
-        
-        function updateMovement() {
-            const weapon = getCurrentWeapon();
-            let speedBonus = 0;
-            if (weapon.id === "weapon_knife") speedBonus = 0.5;
-            if (weapon.id === "weapon_katana") speedBonus = 0.3;
-            
-            let speed = (keys.shift ? 5.5 : 3.2) + speedBonus;
-            let moveX = 0;
-            
-            if (keys.a) moveX = -1;
-            if (keys.d) moveX = 1;
-            
-            player.velocityX = moveX * speed;
-            player.x += player.velocityX;
-            
-            if (keys.space && !player.isJumping && player.onGround) {
-                player.isJumping = true;
-                player.velocityY = -11;
-                player.onGround = false;
-            }
-            
-            player.velocityY += 0.7;
-            player.y += player.velocityY;
-            
-            if (player.y + player.height >= groundY) {
-                player.y = groundY - player.height;
-                player.velocityY = 0;
-                player.isJumping = false;
-                player.onGround = true;
-            }
-            
-            player.x = Math.min(Math.max(player.x, 50), canvas.width - 50);
-            
-            if (moveX > 0) player.facing = 'right';
-            if (moveX < 0) player.facing = 'left';
-        }
-        
-        function drawBackground() {
-            const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-            grad.addColorStop(0, '#1a1e1c');
-            grad.addColorStop(1, '#0a0c0a');
-            ctx.fillStyle = grad;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            ctx.fillStyle = '#2a2a22';
-            ctx.fillRect(0, groundY, canvas.width, canvas.height - groundY);
-            
-            ctx.strokeStyle = '#5a5a3a';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(0, groundY);
-            ctx.lineTo(canvas.width, groundY);
-            ctx.stroke();
-            
-            ctx.fillStyle = '#3a3a2a';
-            ctx.font = "30px monospace";
-            ctx.fillText("☭", canvas.width - 80, 80);
-            
-            ctx.font = "20px monospace";
-            ctx.fillStyle = "#aa5533";
-            ctx.fillText(`LEVEL ${currentLevel}`, canvas.width/2 - 50, 60);
-        }
-        
-        function drawPlayer() {
-            const outfitId = getDisplayOutfit();
-            const outfit = outfits.find(o => o.id === outfitId);
-            const weapon = getCurrentWeapon();
-            
-            ctx.save();
-            if (player.facing === 'left') {
-                ctx.translate(player.x, player.y + player.height/2);
-                ctx.scale(-1, 1);
-                ctx.translate(-player.x, -(player.y + player.height/2));
-            }
-            
-            if (outfit && outfit.showsSkin) {
-                ctx.fillStyle = '#f4d0b5';
-                ctx.beginPath();
-                ctx.ellipse(player.x, player.y + 30, 20, 30, 0, 0, Math.PI*2);
-                ctx.fill();
-                ctx.fillRect(player.x - 15, player.y + 50, 12, 25);
-                ctx.fillRect(player.x + 3, player.y + 50, 12, 25);
-                ctx.fillRect(player.x - 28, player.y + 25, 15, 20);
-                ctx.fillRect(player.x + 13, player.y + 25, 15, 20);
-            }
-            
-            const img = new Image();
-            img.src = `images/${outfitId}.png`;
-            if (img.complete) {
-                ctx.drawImage(img, player.x - player.width/2, player.y, player.width, player.height);
-            } else {
-                ctx.fillStyle = '#ff99cc';
-                ctx.fillRect(player.x - player.width/2, player.y, player.width, player.height);
-            }
-            
-            ctx.restore();
-            
-            if (attackCooldown > 0 || true) {
-                let weaponColor = weapon.id === "weapon_chainsaw" ? "#cc5533" : "#8a6a3a";
-                ctx.fillStyle = weaponColor;
-                let weaponX = player.x + (player.facing === 'right' ? 25 : -55);
-                ctx.fillRect(weaponX, player.y + 35, 45, 12);
-                ctx.fillStyle = "#aaaaaa";
-                ctx.fillRect(weaponX + 35, player.y + 30, 15, 22);
-            }
-        }
-        
-        function drawCrosshair() {
-            ctx.strokeStyle = '#ffcc88';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(mouseX - 12, mouseY);
-            ctx.lineTo(mouseX - 4, mouseY);
-            ctx.moveTo(mouseX + 4, mouseY);
-            ctx.lineTo(mouseX + 12, mouseY);
-            ctx.moveTo(mouseX, mouseY - 12);
-            ctx.lineTo(mouseX, mouseY - 4);
-            ctx.moveTo(mouseX, mouseY + 4);
-            ctx.lineTo(mouseX, mouseY + 12);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.arc(mouseX, mouseY, 10, 0, Math.PI*2);
-            ctx.stroke();
-        }
-        
-        function drawEnemies() {
-            for (let e of enemies) e.draw();
+        function showMessage(msg, isError = false) {
+            const msgDiv = document.getElementById('message');
+            msgDiv.innerText = msg;
+            msgDiv.style.color = isError ? "#ff8866" : "#ffcc88";
+            msgDiv.style.display = 'block';
+            setTimeout(() => msgDiv.style.display = 'none', 2000);
         }
         
         function updateUI() {
-            const weapon = getCurrentWeapon();
-            document.getElementById('healthFill').style.width = Math.max(0, (player.health/player.maxHealth) * 100) + '%';
-            document.getElementById('coins').innerText = coins;
-            document.getElementById('storeCoins').innerText = coins;
+            document.getElementById('healthVal').innerText = player.health;
             document.getElementById('kills').innerText = kills;
-            document.getElementById('currentWeaponName').innerText = weapon.name;
-            document.getElementById('weaponStat').innerHTML = `DMG: ${weapon.damage} | SPD: ${weapon.speed.toFixed(1)}`;
-            document.getElementById('currentLevel').innerText = currentLevel;
+            document.getElementById('coinsAmount').innerText = coins;
+            document.getElementById('storeCoins').innerText = coins;
+            const weapon = getCurrentWeapon();
+            document.getElementById('currentWeaponName').innerHTML = `${weapon.name} (DMG:${weapon.damage})`;
         }
         
-        function showMessage(msg, duration) {
-            const msgDiv = document.getElementById('message');
-            msgDiv.innerText = msg;
-            msgDiv.style.display = 'block';
-            setTimeout(() => {
-                msgDiv.style.display = 'none';
-            }, duration);
-        }
-        
-        // Try On System
+        // TRY ON SYSTEM
         function tryOnOutfit(outfitId, outfitName) {
             player.tryOnOutfit = outfitId;
-            showMessage(`🔍 Trying on ${outfitName}... Buy to keep it!`, 1500);
+            showMessage(`🔍 TRYING ON: ${outfitName}`, false);
+            // Reload image
+            annyImage.src = `images/${outfitId}.png`;
         }
         
         function cancelTryOn() {
             player.tryOnOutfit = null;
-            showMessage(`👗 Back to ${outfits.find(o => o.id === player.currentOutfit).name}`, 1000);
+            annyImage.src = `images/${player.currentOutfit}.png`;
+            showMessage(`👗 Back to ${outfits.find(o => o.id === player.currentOutfit).name}`, false);
         }
         
+        // BUY SYSTEM
+        function buyItem(type, id, price) {
+            if (coins >= price) {
+                coins -= price;
+                if (type === 'outfit') {
+                    const outfit = outfits.find(o => o.id === id);
+                    outfit.owned = true;
+                    cancelTryOn();
+                    showMessage(`✅ Purchased ${outfit.name}! Go to equip.`, false);
+                } else {
+                    const weapon = weapons.find(w => w.id === id);
+                    weapon.owned = true;
+                    showMessage(`✅ Purchased ${weapon.name}! Go to equip.`, false);
+                }
+                updateUI();
+                renderStore();
+            } else {
+                showMessage(`❌ Need ${price - coins} more coins!`, true);
+            }
+        }
+        
+        // EQUIP SYSTEM
+        function equipItem(type, id) {
+            if (type === 'outfit') {
+                outfits.forEach(o => o.equipped = false);
+                const outfit = outfits.find(o => o.id === id);
+                outfit.equipped = true;
+                player.currentOutfit = id;
+                cancelTryOn();
+                showMessage(`✨ ${outfit.name} equipped!`, false);
+            } else {
+                weapons.forEach(w => w.equipped = false);
+                const weapon = weapons.find(w => w.id === id);
+                weapon.equipped = true;
+                player.currentWeapon = id;
+                showMessage(`✨ ${weapon.name} equipped!`, false);
+            }
+            updateUI();
+            renderStore();
+        }
+        
+        // STORE RENDER
         function renderStore() {
-            const container = document.getElementById('productsGrid');
             const allItems = [
                 ...outfits.map(o => ({ type: 'outfit', ...o })),
                 ...weapons.filter(w => !w.owned).map(w => ({ type: 'weapon', ...w }))
             ];
             
-            container.innerHTML = allItems.map(item => `
+            let filtered = allItems;
+            if (currentCategory !== "All") {
+                filtered = allItems.filter(item => {
+                    if (item.type === 'outfit') return item.category === currentCategory;
+                    return item.type === currentCategory.toLowerCase();
+                });
+            }
+            
+            const container = document.getElementById('productsGrid');
+            container.innerHTML = filtered.map(item => `
                 <div class="product-card">
                     <div class="product-name">${item.name}</div>
                     <div class="product-price">💰 ${item.price} coins</div>
-                    ${item.type === 'weapon' ? `<div class="product-quality">⚔️ ${item.quality} | DMG:${item.damage} SPD:${item.speed}</div>` : ''}
-                    <div style="display:flex; gap:5px; justify-content:center;">
-                        <button class="try-btn" onclick="tryOnItem('${item.type}', '${item.id}', '${item.name}')">🔍 TRY ON</button>
+                    ${item.type === 'weapon' ? `<div class="product-quality">⚔️ ${item.quality} | DMG:${item.damage}</div>` : 
+                                              `<div class="product-quality">✨ ${item.effect || 'No effect'}</div>`}
+                    <div>
+                        <button class="try-btn" onclick="tryOnItem('${item.type}', '${item.id}', '${item.name}')">🔍 TRY</button>
                         ${!item.owned ? `<button class="buy-btn" onclick="buyItem('${item.type}', '${item.id}', ${item.price})">🛒 BUY</button>` : 
-                                          `<div style="color:#44ff44; margin-top:8px;">✓ OWNED${item.equipped ? ' (EQUIPPED)' : ''}</div>
-                                           ${!item.equipped ? `<button class="equip-btn" onclick="equipItem('${item.type}', '${item.id}')">⚔️ EQUIP</button>` : ''}`}
+                                          `<button class="equip-btn" onclick="equipItem('${item.type}', '${item.id}')">⚔️ EQUIP</button>`}
                     </div>
+                    ${item.owned ? `<div style="color:#44ff44; font-size:10px; margin-top:5px;">✓ OWNED${item.equipped ? ' (EQUIPPED)' : ''}</div>` : ''}
                 </div>
             `).join('');
         }
@@ -864,178 +485,196 @@
             if (type === 'outfit') {
                 tryOnOutfit(id, name);
             } else {
-                showMessage(`🔍 Weapon ${name} - DMG: ${weapons.find(w => w.id === id).damage}`, 1500);
-            }
-        }
-        
-        function buyItem(type, id, price) {
-            if (coins >= price) {
-                coins -= price;
-                if (type === 'outfit') {
-                    const outfit = outfits.find(o => o.id === id);
-                    outfit.owned = true;
-                    cancelTryOn();
-                } else {
-                    const weapon = weapons.find(w => w.id === id);
-                    weapon.owned = true;
-                }
-                updateUI();
-                renderStore();
-                showMessage(`✅ Purchased ${id.replace(/_/g, ' ')}!`, 1500);
-            } else {
-                showMessage(`❌ Need ${price - coins} more coins!`, 1500);
-            }
-        }
-        
-        function equipItem(type, id) {
-            if (type === 'outfit') {
-                outfits.forEach(o => o.equipped = false);
-                const outfit = outfits.find(o => o.id === id);
-                outfit.equipped = true;
-                player.currentOutfit = id;
-                cancelTryOn();
-            } else {
-                weapons.forEach(w => w.equipped = false);
                 const weapon = weapons.find(w => w.id === id);
-                weapon.equipped = true;
-                player.currentWeapon = id;
+                showMessage(`🔍 ${weapon.name} - ${weapon.quality}`, false);
             }
-            updateUI();
-            renderStore();
-            showMessage(`✨ ${id.replace(/_/g, ' ')} equipped!`, 1000);
         }
         
-        // Splash & Story
-        function showSplashAndStory() {
-            const splashDiv = document.createElement('div');
-            splashDiv.className = 'splash';
-            splashDiv.innerHTML = `
-                <div class="splash-content">
-                    <div class="made-with">MADE WITH CODE</div>
-                    <div class="studio-name">NEXUS PLAY</div>
-                    <div style="margin-top: 25px;">THE GREY CORRIDOR</div>
-                </div>
-                <div class="version-tag">version 2.0 - 16 Massive Levels</div>
-            `;
-            document.body.appendChild(splashDiv);
-            
-            setTimeout(() => {
-                splashDiv.classList.add('fade-out');
-                setTimeout(() => splashDiv.remove(), 1000);
-            }, 3000);
-            
-            const storyModal = document.createElement('div');
-            storyModal.className = 'story-modal';
-            storyModal.innerHTML = `
-                <div class="story-box">
-                    <h1>🔻 THE GREY CORRIDOR 🔻</h1>
-                    <p>Anny wakes up in an abandoned Soviet bunker. The walls whisper. The shadows move.</p>
-                    <p>Officers corrupted by an ancient curse roam these halls. Find weapons, buy outfits, and survive.</p>
-                    <p><strong>8 FREE massive levels + 8 MORE for $7! Try on outfits before buying!</strong></p>
-                </div>
-            `;
-            document.body.appendChild(storyModal);
-            
-            setTimeout(() => {
-                if (storyModal && storyModal.remove) storyModal.remove();
-            }, 5000);
+        // ENEMY CLASS
+        class Enemy {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.health = 3;
+                this.maxHealth = 3;
+                this.speed = 1.2;
+            }
+            update() {
+                if (this.x < player.x) this.x += this.speed;
+                if (this.x > player.x) this.x -= this.speed;
+            }
+            draw() {
+                ctx.fillStyle = '#2a3a2a';
+                ctx.beginPath();
+                ctx.ellipse(this.x, this.y + 35, 25, 35, 0, 0, Math.PI*2);
+                ctx.fill();
+                ctx.fillStyle = '#ff3333';
+                ctx.beginPath();
+                ctx.arc(this.x - 12, this.y + 25, 5, 0, Math.PI*2);
+                ctx.arc(this.x + 12, this.y + 25, 5, 0, Math.PI*2);
+                ctx.fill();
+                ctx.fillStyle = '#330000';
+                ctx.fillRect(this.x - 25, this.y - 5, 50, 6);
+                ctx.fillStyle = '#00aa00';
+                ctx.fillRect(this.x - 25, this.y - 5, 50 * (this.health / this.maxHealth), 6);
+            }
+            takeDamage(amt) {
+                this.health -= amt;
+                return this.health <= 0;
+            }
         }
         
-        // Game Loop
-        let canvas = document.getElementById('gameCanvas');
-        let ctx = canvas.getContext('2d');
+        // GAME FUNCTIONS
+        function drawBackground() {
+            ctx.fillStyle = '#1a1e1c';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#2a2a22';
+            ctx.fillRect(0, groundY, canvas.width, canvas.height - groundY);
+            ctx.fillStyle = '#ffdd44';
+            ctx.font = "24px monospace";
+            ctx.fillText("☭", canvas.width - 60, 60);
+        }
+        
+        function drawAnny() {
+            if (imageLoaded && annyImage.complete && annyImage.naturalWidth > 0) {
+                ctx.drawImage(annyImage, player.x - player.width/2, player.y, player.width, player.height);
+            } else {
+                ctx.fillStyle = '#ff66aa';
+                ctx.fillRect(player.x - player.width/2, player.y, player.width, player.height);
+                ctx.fillStyle = '#fff';
+                ctx.font = "16px monospace";
+                ctx.fillText("ANNY", player.x - 20, player.y + 45);
+            }
+        }
+        
+        function drawEnemies() { for (let e of enemies) e.draw(); }
+        
+        function updateMovement() {
+            let speed = 3.5;
+            if (keys.left) player.x -= speed;
+            if (keys.right) player.x += speed;
+            if (keys.up && player.y + player.height >= groundY) player.y -= 12;
+            if (player.y + player.height < groundY) player.y += 8;
+            if (player.y + player.height > groundY) player.y = groundY - player.height;
+            player.x = Math.min(Math.max(player.x, 40), canvas.width - 40);
+            if (keys.left) player.facing = 'left';
+            if (keys.right) player.facing = 'right';
+        }
+        
+        function attack() {
+            if (attackCooldown > 0) return;
+            const weapon = getCurrentWeapon();
+            attackCooldown = Math.floor(18 / weapon.speed);
+            for (let i = 0; i < enemies.length; i++) {
+                const e = enemies[i];
+                if (Math.abs(player.x - e.x) < 70 && Math.abs(player.y - e.y) < 70) {
+                    if (e.takeDamage(weapon.damage)) {
+                        enemies.splice(i, 1);
+                        kills++;
+                        coins += 50;
+                        updateUI();
+                        showMessage(`💀 Officer defeated! +50 coins`, false);
+                    } else {
+                        showMessage(`⚔️ ${weapon.name} hit! ${e.health}/${e.maxHealth} left`, false);
+                    }
+                    break;
+                }
+            }
+            ctx.fillStyle = '#ffaa66';
+            ctx.globalAlpha = 0.3;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.globalAlpha = 1;
+        }
+        
+        function updateEnemies() {
+            for (let i = 0; i < enemies.length; i++) {
+                const e = enemies[i];
+                e.update();
+                if (Math.abs(player.x - e.x) < 50 && Math.abs(player.y - e.y) < 60) {
+                    player.health -= 10;
+                    updateUI();
+                    enemies.splice(i, 1);
+                    i--;
+                    if (player.health <= 0) {
+                        alert("💀 ANNY DIED! Refresh to play again.");
+                        player.health = 100;
+                        kills = 0;
+                        coins = 500;
+                        updateUI();
+                        enemies = [];
+                        for (let j = 0; j < 3; j++) enemies.push(new Enemy(Math.random() * (canvas.width - 150) + 75, groundY - 50));
+                    }
+                    showMessage(`💔 You took damage! Health: ${player.health}`, true);
+                }
+            }
+            if (enemies.length === 0) {
+                for (let i = 0; i < 4; i++) enemies.push(new Enemy(Math.random() * (canvas.width - 150) + 75, groundY - 50));
+                showMessage("🔥 New wave of officers!", false);
+            }
+        }
         
         function resizeCanvas() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-            groundY = canvas.height - 120;
+            groundY = canvas.height - 100;
             player.y = groundY - player.height;
         }
         
         function gameLoop() {
             if (!gameRunning) return;
-            
             updateMovement();
             if (attackCooldown > 0) attackCooldown--;
-            
-            for (let e of enemies) e.update();
-            
+            updateEnemies();
             drawBackground();
             drawEnemies();
-            drawPlayer();
-            drawCrosshair();
-            
-            frameCounter++;
+            drawAnny();
             requestAnimationFrame(gameLoop);
         }
         
         // Event Listeners
-        window.addEventListener('resize', () => resizeCanvas());
+        document.getElementById('btnLeft').onmousedown = () => keys.left = true;
+        document.getElementById('btnLeft').ontouchstart = () => keys.left = true;
+        document.getElementById('btnRight').onmousedown = () => keys.right = true;
+        document.getElementById('btnRight').ontouchstart = () => keys.right = true;
+        document.getElementById('btnUp').onmousedown = () => keys.up = true;
+        document.getElementById('btnUp').ontouchstart = () => keys.up = true;
+        document.getElementById('btnDown').onmousedown = () => keys.down = true;
+        document.getElementById('btnDown').ontouchstart = () => keys.down = true;
         
-        canvas.addEventListener('mousemove', (e) => {
-            const rect = canvas.getBoundingClientRect();
-            mouseX = e.clientX - rect.left;
-            mouseY = e.clientY - rect.top;
-        });
+        document.getElementById('btnLeft').onmouseup = () => keys.left = false;
+        document.getElementById('btnLeft').ontouchend = () => keys.left = false;
+        document.getElementById('btnRight').onmouseup = () => keys.right = false;
+        document.getElementById('btnRight').ontouchend = () => keys.right = false;
+        document.getElementById('btnUp').onmouseup = () => keys.up = false;
+        document.getElementById('btnUp').ontouchend = () => keys.up = false;
+        document.getElementById('btnDown').onmouseup = () => keys.down = false;
+        document.getElementById('btnDown').ontouchend = () => keys.down = false;
         
-        canvas.addEventListener('click', () => attack());
-        
-        window.addEventListener('keydown', (e) => {
-            const key = e.key.toLowerCase();
-            if (key === 'w') keys.w = true;
-            if (key === 's') keys.s = true;
-            if (key === 'a') keys.a = true;
-            if (key === 'd') keys.d = true;
-            if (key === 'shift') keys.shift = true;
-            if (key === ' ') {
-                e.preventDefault();
-                keys.space = true;
-            }
-        });
-        
-        window.addEventListener('keyup', (e) => {
-            const key = e.key.toLowerCase();
-            if (key === 'w') keys.w = false;
-            if (key === 's') keys.s = false;
-            if (key === 'a') keys.a = false;
-            if (key === 'd') keys.d = false;
-            if (key === 'shift') keys.shift = false;
-            if (key === ' ') keys.space = false;
-        });
+        document.getElementById('btnAttack').onclick = () => attack();
+        document.getElementById('btnAttack').ontouchstart = () => attack();
         
         document.getElementById('storeBtn').onclick = () => {
             document.getElementById('storePanel').style.display = 'flex';
             renderStore();
         };
-        
         document.getElementById('closeStoreBtn').onclick = () => {
             document.getElementById('storePanel').style.display = 'none';
             cancelTryOn();
         };
         
-        document.getElementById('levelUpgradeBtn').onclick = () => {
-            buyMoreLevels();
-        };
+        window.addEventListener('resize', resizeCanvas);
         
-        document.getElementById('closeComingSoonBtn').onclick = () => {
-            document.getElementById('comingSoonPanel').style.display = 'none';
-            gameRunning = true;
-            gameLoop();
-        };
-        
+        // Make functions global for HTML buttons
         window.tryOnItem = tryOnItem;
         window.buyItem = buyItem;
         window.equipItem = equipItem;
         
-        function init() {
-            resizeCanvas();
-            showSplashAndStory();
-            loadLevel();
-            gameLoop();
-            showMessage("🎮 16 Massive Levels! WASD = Move | Shift = Run | Space = Jump | Click = Attack", 5000);
-        }
-        
-        init();
+        // Initialize
+        for (let i = 0; i < 3; i++) enemies.push(new Enemy(Math.random() * (canvas.width - 150) + 75, groundY - 50));
+        resizeCanvas();
+        updateUI();
+        gameLoop();
+        showMessage("🎮 Touch buttons = Move | ⚔️ = Attack | 🛒 = Store | TRY outfits before buying!", false);
     </script>
 </body>
 </html>
